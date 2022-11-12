@@ -64,13 +64,13 @@ namespace GameLibrary.Mathematics
         }
         
         /// <summary>
-        /// Returns true quaternions are equal, false otherwise.
+        /// Returns true if quaternions are equal, false otherwise.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(SoftQuaternion a, SoftQuaternion b) => ApproximatelyEqual(a, b, SoftFloat.Epsilon);
 
         /// <summary>
-        /// Returns true quaternions are not equal, false otherwise.
+        /// Returns true if quaternions are not equal, false otherwise.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(SoftQuaternion a, SoftQuaternion b) => !(a == b);
