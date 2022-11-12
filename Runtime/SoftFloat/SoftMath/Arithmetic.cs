@@ -2,6 +2,13 @@
 {
 	public static partial class SoftMath
 	{
+		private const uint RawSqrt2 = 0x3fb504f3;
+		
+		/// <summary>
+		/// The square root 2. Approximately 1.414213...
+		/// </summary>
+		public static SoftFloat Sqrt2 => SoftFloat.FromRaw(RawSqrt2);
+		
         /// <summary>
         /// Returns the sign of the given soft float number.
         /// </summary>
@@ -353,7 +360,15 @@
 		}
 
 		/// <summary>
-		/// Returns the square root of x
+		/// Returns the reverse square root of x.
+		/// </summary>
+		public static SoftFloat Rsqrt(SoftFloat x)
+		{
+			return SoftFloat.One / Sqrt(x);
+		}
+
+		/// <summary>
+		/// Returns the square root of x.
 		/// </summary>
 		public static SoftFloat Sqrt(SoftFloat x)
 		{

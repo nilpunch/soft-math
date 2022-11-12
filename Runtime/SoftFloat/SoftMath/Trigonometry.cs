@@ -2,12 +2,45 @@
 {
 	public static partial class SoftMath
 	{
-		private const uint PI = 0x40490fdb; // 3.1415926535897932384626433832795
-		private const uint HalfPI = 0x3fc90fdb; // 1.5707963267948966192313216916398
-		private const uint TwoPI = 0x40c90fdb; // 6.283185307179586476925286766559
-		private const uint PIOver4 = 0x3f490fdb; // 0.78539816339744830961566084581988
-		private const uint PITimes3Over4 = 0x4016cbe4; // 2.3561944901923449288469825374596
+		private const uint RawPI = 0x40490fdb; // 3.1415926535897932384626433832795
+		private const uint RawHalfPI = 0x3fc90fdb; // 1.5707963267948966192313216916398
+		private const uint RawTwoPI = 0x40c90fdb; // 6.283185307179586476925286766559
+		private const uint RawPIOver4 = 0x3f490fdb; // 0.78539816339744830961566084581988
+		private const uint RawPITimes3Over4 = 0x4016cbe4; // 2.3561944901923449288469825374596
+		
+		private const uint RawDeg2Rad = 0x3c8efa35; // 0.017453292
+		private const uint RawRad2Deg = 0x42652ee1; // // 57.29578049
+		
+		/// <summary>
+		/// The ratio of a circle's circumference to its diameter. Approximately 3.141592...
+		/// </summary>
+		public static SoftFloat PI => SoftFloat.FromRaw(RawPI);
+		
+		/// <summary>
+		/// PI / 2. Approximately 1.570798...
+		/// </summary>
+		public static SoftFloat PIHalf => SoftFloat.FromRaw(RawHalfPI);
 
+		/// <summary>
+		/// PI / 4. Approximately 0.785398...
+		/// </summary>
+		public static SoftFloat PIOver4 => SoftFloat.FromRaw(RawPIOver4);
+
+		/// <summary>
+		/// PI * 2. Approximately 6.283185...
+		/// </summary>
+		public static SoftFloat TwoPI => SoftFloat.FromRaw(RawTwoPI);
+
+		/// <summary>
+		/// Degrees-to-radians conversion constant.
+		/// </summary>
+		public static SoftFloat Deg2Rad => SoftFloat.FromRaw(RawDeg2Rad);
+		
+		/// <summary>
+		/// Radians-to-degrees conversion constant.
+		/// </summary>
+		public static SoftFloat Rad2Deg => SoftFloat.FromRaw(RawRad2Deg);
+		
 		/// <summary>
 		/// Returns the sine of x.
 		/// </summary>
@@ -19,18 +52,18 @@
 			// sin(x) ~= (16x * (pi - x)) / (5pi^2 - 4x * (pi - x)) if 0 <= x <= pi
 
 			// move x into range
-			x %= SoftFloat.FromRaw(TwoPI);
+			x %= SoftFloat.FromRaw(RawTwoPI);
 			if (SoftFloat.IsNegative(x))
 			{
-				x += SoftFloat.FromRaw(TwoPI);
+				x += SoftFloat.FromRaw(RawTwoPI);
 			}
 
 			bool negate;
-			if (x > SoftFloat.FromRaw(PI))
+			if (x > SoftFloat.FromRaw(RawPI))
 			{
 				// pi < x <= 2pi, we need to move x to the 0 <= x <= pi range
 				// also, we need to negate the result before returning it
-				x = SoftFloat.FromRaw(TwoPI) - x;
+				x = SoftFloat.FromRaw(RawTwoPI) - x;
 				negate = true;
 			}
 			else
@@ -38,7 +71,7 @@
 				negate = false;
 			}
 
-			SoftFloat piMinusX = SoftFloat.FromRaw(PI) - x;
+			SoftFloat piMinusX = SoftFloat.FromRaw(RawPI) - x;
 			SoftFloat result = ((SoftFloat)16.0f * x * piMinusX) /
 			                   (SoftFloat.FromRaw(piSquaredTimesFive) - (SoftFloat)4.0f * x * piMinusX);
 			return negate ? -result : result;
@@ -47,7 +80,7 @@
 		/// <summary>
 		/// Returns the cosine of x.
 		/// </summary>
-		public static SoftFloat Cos(SoftFloat x) => Sin(x + SoftFloat.FromRaw(HalfPI));
+		public static SoftFloat Cos(SoftFloat x) => Sin(x + SoftFloat.FromRaw(RawHalfPI));
 
 		/// <summary>
 		/// Returns the tangent of x.
@@ -320,17 +353,17 @@
 					case 1:
 						return y; /* atan(+-0,+anything)=+-0 */
 					case 2:
-						return SoftFloat.FromRaw(PI); /* atan(+0,-anything) = pi */
+						return SoftFloat.FromRaw(RawPI); /* atan(+0,-anything) = pi */
 					case 3:
 					default:
-						return -SoftFloat.FromRaw(PI); /* atan(-0,-anything) =-pi */
+						return -SoftFloat.FromRaw(RawPI); /* atan(-0,-anything) =-pi */
 				}
 			}
 
 			/* when x = 0 */
 			if (ix == 0)
 			{
-				return (m & 1) != 0 ? -SoftFloat.FromRaw(HalfPI) : SoftFloat.FromRaw(HalfPI);
+				return (m & 1) != 0 ? -SoftFloat.FromRaw(RawHalfPI) : SoftFloat.FromRaw(RawHalfPI);
 			}
 
 			/* when x is INF */
@@ -341,14 +374,14 @@
 					switch (m)
 					{
 						case 0:
-							return SoftFloat.FromRaw(PIOver4); /* atan(+INF,+INF) */
+							return SoftFloat.FromRaw(RawPIOver4); /* atan(+INF,+INF) */
 						case 1:
-							return -SoftFloat.FromRaw(PIOver4); /* atan(-INF,+INF) */
+							return -SoftFloat.FromRaw(RawPIOver4); /* atan(-INF,+INF) */
 						case 2:
-							return SoftFloat.FromRaw(PITimes3Over4); /* atan(+INF,-INF)*/
+							return SoftFloat.FromRaw(RawPITimes3Over4); /* atan(+INF,-INF)*/
 						case 3:
 						default:
-							return -SoftFloat.FromRaw(PITimes3Over4); /* atan(-INF,-INF)*/
+							return -SoftFloat.FromRaw(RawPITimes3Over4); /* atan(-INF,-INF)*/
 					}
 				}
 				else
@@ -360,10 +393,10 @@
 						case 1:
 							return -SoftFloat.Zero; /* atan(-...,+INF) */
 						case 2:
-							return SoftFloat.FromRaw(PI); /* atan(+...,-INF) */
+							return SoftFloat.FromRaw(RawPI); /* atan(+...,-INF) */
 						case 3:
 						default:
-							return -SoftFloat.FromRaw(PI); /* atan(-...,-INF) */
+							return -SoftFloat.FromRaw(RawPI); /* atan(-...,-INF) */
 					}
 				}
 			}
@@ -371,7 +404,7 @@
 			/* |y/x| > 0x1p26 */
 			if (ix + (26 << 23) < iy || iy == 0x7f800000)
 			{
-				return (m & 1) != 0 ? -SoftFloat.FromRaw(HalfPI) : SoftFloat.FromRaw(HalfPI);
+				return (m & 1) != 0 ? -SoftFloat.FromRaw(RawHalfPI) : SoftFloat.FromRaw(RawHalfPI);
 			}
 
 			/* z = atan(|y/x|) with correct underflow */
@@ -386,10 +419,10 @@
 				case 1:
 					return -z; /* atan(-,+) */
 				case 2:
-					return SoftFloat.FromRaw(PI) - (z - SoftFloat.FromRaw(piLou32)); /* atan(+,-) */
+					return SoftFloat.FromRaw(RawPI) - (z - SoftFloat.FromRaw(piLou32)); /* atan(+,-) */
 				case 3:
 				default:
-					return (z - SoftFloat.FromRaw(piLou32)) - SoftFloat.FromRaw(PI); /* atan(-,-) */
+					return (z - SoftFloat.FromRaw(piLou32)) - SoftFloat.FromRaw(RawPI); /* atan(-,-) */
 			}
 		}
 
@@ -472,6 +505,6 @@
 		/// <summary>
 		/// Returns the arcsine of x.
 		/// </summary>
-		public static SoftFloat Asin(SoftFloat x) => SoftFloat.FromRaw(HalfPI) - Acos(x);
+		public static SoftFloat Asin(SoftFloat x) => SoftFloat.FromRaw(RawHalfPI) - Acos(x);
 	}
 }

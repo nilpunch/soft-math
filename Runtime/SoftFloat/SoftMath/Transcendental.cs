@@ -2,6 +2,37 @@
 {
 	public static partial class SoftMath
 	{
+		private const uint RawE = 0x402df854;
+		private const uint RawLog2E = 0x3fb8aa3b;
+		private const uint RawLog10E = 0x3ede5bd9;
+		private const uint RawLn2 = 0x3f317218;
+		private const uint RawLn10 = 0x40135d8e;
+
+		/// <summary>
+		/// The mathematical constant e also known as Euler's number. Approximately 2.718281...
+		/// </summary>
+		public static SoftFloat E => SoftFloat.FromRaw(RawE);
+
+		/// <summary>
+		/// The base 2 logarithm of e. Approximately 1.44...
+		/// </summary>
+		public static SoftFloat Log2E => SoftFloat.FromRaw(RawLog2E);
+
+		/// <summary>
+		/// The base 10 logarithm of e. Approximately 0.43...
+		/// </summary>
+		public static SoftFloat Log10E => SoftFloat.FromRaw(RawLog10E);
+
+		/// <summary>
+		/// The natural logarithm of 2. Approximately 0.69...
+		/// </summary>
+		public static SoftFloat Ln2 => SoftFloat.FromRaw(RawLn2);
+
+		/// <summary>
+		/// The natural logarithm of 10. Approximately 2.30...
+		/// </summary>
+		public static SoftFloat Ln10 => SoftFloat.FromRaw(RawLn10);
+		
 		/// <summary>
 		/// Returns e raised to the power x (e ~= 2.71828182845904523536).
 		/// </summary>

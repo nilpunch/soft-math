@@ -24,7 +24,7 @@ namespace GameLibrary.Mathematics
         /// <summary>
         /// The identity rotation.
         /// </summary>
-        public static readonly SoftQuaternion Identity = new SoftQuaternion(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.One);
+        public static SoftQuaternion Identity => new SoftQuaternion(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.One);
 
         /// <summary>
         /// The composite rotation of two quaternions.
@@ -64,12 +64,32 @@ namespace GameLibrary.Mathematics
         }
         
         /// <summary>
+        /// Returns true quaternions are equal, false otherwise.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(SoftQuaternion a, SoftQuaternion b) => ApproximatelyEqual(a, b, SoftFloat.Epsilon);
+
+        /// <summary>
+        /// Returns true quaternions are not equal, false otherwise.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(SoftQuaternion a, SoftQuaternion b) => !(a == b);
+        
+        /// <summary>
         /// The dot product between two rotations.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftFloat Dot(SoftQuaternion a, SoftQuaternion b)
         {
             return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
+        }
+        
+        /// <summary>
+        /// Compares two quaternions with some epsilon and returns true if they are similar.
+        /// </summary>
+        public static bool ApproximatelyEqual(SoftQuaternion a, SoftQuaternion b, SoftFloat epsilon)
+        {
+            return Dot(a, b) > SoftFloat.One - epsilon;
         }
     }
 }

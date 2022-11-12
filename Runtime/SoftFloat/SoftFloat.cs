@@ -1,4 +1,4 @@
-﻿// mostly from https://github.com/CodesInChaos/SoftFloat
+﻿// Mostly from https://github.com/CodesInChaos/SoftFloat
 
 // Copyright (c) 2011 CodesInChaos
 //
@@ -25,7 +25,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-
 namespace GameLibrary.Mathematics
 {
 	// Internal representation is identical to IEEE binary32 floating point numbers
@@ -45,7 +44,8 @@ namespace GameLibrary.Mathematics
         private const uint RawMinusOne = RawOne ^ SignMask;
         private const uint RawMaxValue = 0x7F7FFFFF;
         private const uint RawMinValue = 0x7F7FFFFF ^ SignMask;
-        private const uint RawEpsilon = 0x00000001;
+        private const uint RawAbsoluteEpsilon = 0x00000001;
+        private const uint RawNormalEpsilon = 0x00800000;
         private const uint RawLog2OfE = 0;
 
         private static readonly sbyte[] s_msb = new sbyte[256]
@@ -81,17 +81,16 @@ namespace GameLibrary.Mathematics
 	        0, 31, 9, 30, 3, 8, 13, 29, 2, 5, 7, 21, 12, 24, 28, 19,
 	        1, 10, 4, 14, 6, 22, 25, 20, 11, 15, 23, 26, 16, 27, 17, 18
         };
-	
 
         /// <summary>
 		/// Raw byte representation of an signed float number.
 		/// </summary>
-		private readonly uint _rawValue;
+		public readonly uint RawValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private SoftFloat(uint raw)
 		{
-			_rawValue = raw;
+			RawValue = raw;
 		}
 
         public static SoftFloat Zero => new SoftFloat(RawZero);
@@ -110,14 +109,18 @@ namespace GameLibrary.Mathematics
 
         public static SoftFloat MinValue => new SoftFloat(RawMinValue);
 
-        public static SoftFloat Epsilon => new SoftFloat(RawEpsilon);
+        /// <summary>
+        /// The smallest positive number that can be distinguished from zero. This is the absolute lower limit of the format.
+        /// </summary>
+        public static SoftFloat AbsoluteEpsilon => new SoftFloat(RawAbsoluteEpsilon);
+        
+        /// <summary>
+        /// The smallest value that can be represented as a normalized number in each format.
+        /// Numbers smaller than this can be stored as denormals, but are not held with as much precision.
+        /// </summary>
+        public static SoftFloat Epsilon => new SoftFloat(RawNormalEpsilon);
 
-        public uint RawValue => _rawValue;
-
-        private uint RawMantissa
-		{
-			get { return _rawValue & 0x7FFFFF; }
-		}
+        private uint RawMantissa => RawValue & 0x7FFFFF;
 
         private int Mantissa
 		{
@@ -125,12 +128,12 @@ namespace GameLibrary.Mathematics
 			{
 				if (RawExponent != 0)
 				{
-					uint sign = (uint)((int)_rawValue >> 31);
+					uint sign = (uint)((int)RawValue >> 31);
 					return (int)(((RawMantissa | 0x800000) ^ sign) - sign);
 				}
 				else
 				{
-					uint sign = (uint)((int)_rawValue >> 31);
+					uint sign = (uint)((int)RawValue >> 31);
 					return (int)(((RawMantissa) ^ sign) - sign);
 				}
 			}
@@ -138,7 +141,7 @@ namespace GameLibrary.Mathematics
 
         private sbyte Exponent => (sbyte)(RawExponent - ExponentBias);
 
-        private byte RawExponent => (byte)(_rawValue >> MantissaBits);
+        private byte RawExponent => (byte)(RawValue >> MantissaBits);
 
 
         public string ToString(string format, IFormatProvider formatProvider) =>
@@ -158,14 +161,14 @@ namespace GameLibrary.Mathematics
             if (RawExponent != 255)
             {
                 // 0 == -0
-                return (_rawValue == other._rawValue) ||
-                       ((_rawValue & 0x7FFFFFFF) == 0) && ((other._rawValue & 0x7FFFFFFF) == 0);
+                return (RawValue == other.RawValue) ||
+                       ((RawValue & 0x7FFFFFFF) == 0) && ((other.RawValue & 0x7FFFFFFF) == 0);
             }
 
             if (RawMantissa == 0)
             {
                 // Infinities
-                return _rawValue == other._rawValue;
+                return RawValue == other.RawValue;
             }
 
             // NaNs are equal for `Equals` (as opposed to the == operator)
@@ -181,11 +184,11 @@ namespace GameLibrary.Mathematics
                 return 0;
             }
 
-            uint sign1 = (uint)((int)_rawValue >> 31);
-            int val1 = (int)(((_rawValue) ^ (sign1 & 0x7FFFFFFF)) - sign1);
+            uint sign1 = (uint)((int)RawValue >> 31);
+            int val1 = (int)(((RawValue) ^ (sign1 & 0x7FFFFFFF)) - sign1);
 
-            uint sign2 = (uint)((int)other._rawValue >> 31);
-            int val2 = (int)(((other._rawValue) ^ (sign2 & 0x7FFFFFFF)) - sign2);
+            uint sign2 = (uint)((int)other.RawValue >> 31);
+            int val2 = (int)(((other.RawValue) ^ (sign2 & 0x7FFFFFFF)) - sign2);
             return val1.CompareTo(val2);
         }
 
@@ -193,7 +196,7 @@ namespace GameLibrary.Mathematics
 
         public override int GetHashCode()
         {
-            if (_rawValue == SignMask)
+            if (RawValue == SignMask)
             {
                 // +0 equals -0
                 return 0;
@@ -201,7 +204,7 @@ namespace GameLibrary.Mathematics
 
             if (!IsNaN(this))
             {
-                return (int)_rawValue;
+                return (int)RawValue;
             }
 
             // All NaNs are equal
@@ -224,7 +227,7 @@ namespace GameLibrary.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator float(SoftFloat f)
         {
-	        uint raw = f._rawValue;
+	        uint raw = f.RawValue;
 	        return ReinterpretIntToFloat32(raw);
         }
 
@@ -352,7 +355,7 @@ namespace GameLibrary.Mathematics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static SoftFloat operator -(SoftFloat f) => new SoftFloat(f._rawValue ^ 0x80000000);
+		public static SoftFloat operator -(SoftFloat f) => new SoftFloat(f.RawValue ^ 0x80000000);
 
         public static SoftFloat operator +(SoftFloat f1, SoftFloat f2)
 		{
@@ -371,14 +374,14 @@ namespace GameLibrary.Mathematics
 			if (rawExp1 == 0)
 			{
 				// SubNorm
-				sign1 = (uint)((int)f1._rawValue >> 31);
+				sign1 = (uint)((int)f1.RawValue >> 31);
 				int rawMan1 = (int)f1.RawMantissa;
 				if (rawMan1 == 0)
                 {
                     if (IsFinite(f2))
 					{
 						// 0 * f2
-						return new SoftFloat((f1._rawValue ^ f2._rawValue) & SignMask);
+						return new SoftFloat((f1.RawValue ^ f2.RawValue) & SignMask);
 					}
 
                     // 0 * Infinity
@@ -395,13 +398,13 @@ namespace GameLibrary.Mathematics
 			else if (rawExp1 != 255)
 			{
 				// Norm
-				sign1 = (uint)((int)f1._rawValue >> 31);
+				sign1 = (uint)((int)f1.RawValue >> 31);
 				man1 = (int)(((f1.RawMantissa | 0x800000) ^ sign1) - sign1);
 			}
 			else
             {
                 // Non finite
-				if (f1._rawValue == RawPositiveInfinity)
+				if (f1.RawValue == RawPositiveInfinity)
 				{
 					if (IsZero(f2))
 					{
@@ -415,7 +418,7 @@ namespace GameLibrary.Mathematics
 						return NaN;
 					}
 
-					if ((int)f2._rawValue >= 0)
+					if ((int)f2.RawValue >= 0)
 					{
 						// Infinity * f
 						return PositiveInfinity;
@@ -425,7 +428,7 @@ namespace GameLibrary.Mathematics
                     return NegativeInfinity;
                 }
 
-                if (f1._rawValue == RawNegativeInfinity)
+                if (f1.RawValue == RawNegativeInfinity)
                 {
                     if (IsZero(f2) || IsNaN(f2))
                     {
@@ -434,7 +437,7 @@ namespace GameLibrary.Mathematics
                         return NaN;
                     }
 
-                    if ((int)f2._rawValue < 0)
+                    if ((int)f2.RawValue < 0)
                     {
                         // -Infinity * -f
                         return PositiveInfinity;
@@ -451,14 +454,14 @@ namespace GameLibrary.Mathematics
 			if (rawExp2 == 0)
 			{
 				// SubNorm
-				sign2 = (uint)((int)f2._rawValue >> 31);
+				sign2 = (uint)((int)f2.RawValue >> 31);
 				int rawMan2 = (int)f2.RawMantissa;
 				if (rawMan2 == 0)
                 {
                     if (IsFinite(f1))
 					{
 						// f1 * 0
-						return new SoftFloat((f1._rawValue ^ f2._rawValue) & SignMask);
+						return new SoftFloat((f1.RawValue ^ f2.RawValue) & SignMask);
 					}
 
                     // Infinity * 0
@@ -475,13 +478,13 @@ namespace GameLibrary.Mathematics
 			else if (rawExp2 != 255)
 			{
 				// Norm
-				sign2 = (uint)((int)f2._rawValue >> 31);
+				sign2 = (uint)((int)f2.RawValue >> 31);
 				man2 = (int)(((f2.RawMantissa | 0x800000) ^ sign2) - sign2);
 			}
 			else
             {
                 // Non finite
-				if (f2._rawValue == RawPositiveInfinity)
+				if (f2.RawValue == RawPositiveInfinity)
 				{
 					if (IsZero(f1))
 					{
@@ -489,7 +492,7 @@ namespace GameLibrary.Mathematics
 						return NaN;
 					}
 
-					if ((int)f1._rawValue >= 0)
+					if ((int)f1.RawValue >= 0)
 					{
 						// f * Infinity
 						return PositiveInfinity;
@@ -499,7 +502,7 @@ namespace GameLibrary.Mathematics
                     return NegativeInfinity;
                 }
 
-                if (f2._rawValue == RawNegativeInfinity)
+                if (f2.RawValue == RawNegativeInfinity)
                 {
                     if (IsZero(f1))
                     {
@@ -507,7 +510,7 @@ namespace GameLibrary.Mathematics
                         return NaN;
                     }
 
-                    if ((int)f1._rawValue < 0)
+                    if ((int)f1.RawValue < 0)
                     {
                         // -f * -Infinity
                         return PositiveInfinity;
@@ -566,7 +569,7 @@ namespace GameLibrary.Mathematics
 			if (rawExp1 == 0)
 			{
 				// SubNorm
-				sign1 = (uint)((int)f1._rawValue >> 31);
+				sign1 = (uint)((int)f1.RawValue >> 31);
 				int rawMan1 = (int)f1.RawMantissa;
 				if (rawMan1 == 0)
                 {
@@ -577,7 +580,7 @@ namespace GameLibrary.Mathematics
 					}
 
                     // 0 / f
-                    return new SoftFloat((f1._rawValue ^ f2._rawValue) & SignMask);
+                    return new SoftFloat((f1.RawValue ^ f2.RawValue) & SignMask);
                 }
 
 				int shift = LeadingZeroesCount(rawMan1 & 0x00ffffff) - 8;
@@ -589,13 +592,13 @@ namespace GameLibrary.Mathematics
 			else if (rawExp1 != 255)
 			{
 				// Norm
-				sign1 = (uint)((int)f1._rawValue >> 31);
+				sign1 = (uint)((int)f1.RawValue >> 31);
 				man1 = (int)(((f1.RawMantissa | 0x800000) ^ sign1) - sign1);
 			}
 			else
             {
                 // Non finite
-				if (f1._rawValue == RawPositiveInfinity)
+				if (f1.RawValue == RawPositiveInfinity)
 				{
 					if (IsZero(f2))
 					{
@@ -607,7 +610,7 @@ namespace GameLibrary.Mathematics
 					return NaN;
 				}
 
-                if (f1._rawValue == RawNegativeInfinity)
+                if (f1.RawValue == RawNegativeInfinity)
                 {
                     if (IsZero(f2))
                     {
@@ -627,12 +630,12 @@ namespace GameLibrary.Mathematics
 			if (rawExp2 == 0)
 			{
 				// SubNorm
-				sign2 = (uint)((int)f2._rawValue >> 31);
+				sign2 = (uint)((int)f2.RawValue >> 31);
 				int rawMan2 = (int)f2.RawMantissa;
 				if (rawMan2 == 0)
 				{
 					// f / 0
-					return new SoftFloat(((f1._rawValue ^ f2._rawValue) & SignMask) | RawPositiveInfinity);
+					return new SoftFloat(((f1.RawValue ^ f2.RawValue) & SignMask) | RawPositiveInfinity);
 				}
 
 				int shift = LeadingZeroesCount(rawMan2 & 0x00ffffff) - 8;
@@ -644,13 +647,13 @@ namespace GameLibrary.Mathematics
 			else if (rawExp2 != 255)
 			{
 				// Norm
-				sign2 = (uint)((int)f2._rawValue >> 31);
+				sign2 = (uint)((int)f2.RawValue >> 31);
 				man2 = (int)(((f2.RawMantissa | 0x800000) ^ sign2) - sign2);
 			}
 			else
             {
                 // Non finite
-				if (f2._rawValue == RawPositiveInfinity)
+				if (f2.RawValue == RawPositiveInfinity)
 				{
 					if (IsZero(f1))
 					{
@@ -658,7 +661,7 @@ namespace GameLibrary.Mathematics
 						return Zero;
 					}
 
-					if ((int)f1._rawValue >= 0)
+					if ((int)f1.RawValue >= 0)
 					{
 						// f / Infinity
 						return PositiveInfinity;
@@ -668,7 +671,7 @@ namespace GameLibrary.Mathematics
                     return NegativeInfinity;
                 }
 
-                if (f2._rawValue == RawNegativeInfinity)
+                if (f2.RawValue == RawNegativeInfinity)
                 {
                     if (IsZero(f1))
                     {
@@ -676,7 +679,7 @@ namespace GameLibrary.Mathematics
                         return new SoftFloat(SignMask);
                     }
 
-                    if ((int)f1._rawValue < 0)
+                    if ((int)f1.RawValue < 0)
                     {
                         // -f / -Infinity
                         return PositiveInfinity;
@@ -731,13 +734,13 @@ namespace GameLibrary.Mathematics
             if (f1.RawExponent != 255)
 			{
 				// 0 == -0
-				return f1._rawValue == f2._rawValue || (f1._rawValue & 0x7FFFFFFF) == 0 && (f2._rawValue & 0x7FFFFFFF) == 0;
+				return f1.RawValue == f2.RawValue || (f1.RawValue & 0x7FFFFFFF) == 0 && (f2.RawValue & 0x7FFFFFFF) == 0;
 			}
 
             if (f1.RawMantissa == 0)
             {
                 // Infinities
-                return f1._rawValue == f2._rawValue;
+                return f1.RawValue == f2.RawValue;
             }
 
             // NaNs
@@ -760,13 +763,13 @@ namespace GameLibrary.Mathematics
 		public static bool operator >=(SoftFloat f1, SoftFloat f2) => !IsNaN(f1) && !IsNaN(f2) && f1.CompareTo(f2) >= 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsInfinity(SoftFloat softFloat) => (softFloat._rawValue & 0x7FFFFFFF) == 0x7F800000;
+		public static bool IsInfinity(SoftFloat softFloat) => (softFloat.RawValue & 0x7FFFFFFF) == 0x7F800000;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsNegativeInfinity(SoftFloat softFloat) => softFloat._rawValue == RawNegativeInfinity;
+		public static bool IsNegativeInfinity(SoftFloat softFloat) => softFloat.RawValue == RawNegativeInfinity;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsPositiveInfinity(SoftFloat softFloat) => softFloat._rawValue == RawPositiveInfinity;
+		public static bool IsPositiveInfinity(SoftFloat softFloat) => softFloat.RawValue == RawPositiveInfinity;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsNaN(SoftFloat softFloat) => (softFloat.RawExponent == 255) && !IsInfinity(softFloat);
@@ -775,21 +778,21 @@ namespace GameLibrary.Mathematics
 		public static bool IsFinite(SoftFloat softFloat) => softFloat.RawExponent != 255;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsZero(SoftFloat softFloat) => (softFloat._rawValue & 0x7FFFFFFF) == 0;
+		public static bool IsZero(SoftFloat softFloat) => (softFloat.RawValue & 0x7FFFFFFF) == 0;
 
         /// <summary>
         /// Returns true if the soft float number has a positive sign.
         /// </summary>
         /// <param name="softFloat"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsPositive(SoftFloat softFloat) => (softFloat._rawValue & SignMask) == 0;
+		public static bool IsPositive(SoftFloat softFloat) => (softFloat.RawValue & SignMask) == 0;
 
         /// <summary>
         /// Returns true if the soft float number has a negative sign.
         /// </summary>
         /// <param name="softFloat"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsNegative(SoftFloat softFloat) => (softFloat._rawValue & SignMask) != 0;
+		public static bool IsNegative(SoftFloat softFloat) => (softFloat.RawValue & SignMask) != 0;
 
         private static SoftFloat InternalAdd(SoftFloat f1, SoftFloat f2)
         {
@@ -811,17 +814,17 @@ namespace GameLibrary.Mathematics
                 {
                     // man1 = f1.Mantissa
                     // http://graphics.stanford.edu/~seander/bithacks.html#ConditionalNegate
-                    uint sign1 = (uint)((int)f1._rawValue >> 31);
+                    uint sign1 = (uint)((int)f1.RawValue >> 31);
                     man1 = (int)(((f1.RawMantissa | 0x800000) ^ sign1) - sign1);
                     // man2 = f2.Mantissa
-                    uint sign2 = (uint)((int)f2._rawValue >> 31);
+                    uint sign2 = (uint)((int)f2.RawValue >> 31);
                     man2 = (int)(((f2.RawMantissa | 0x800000) ^ sign2) - sign2);
                 }
                 else
                 {
                     // Subnorm
                     // man2 = f2.Mantissa
-                    uint sign2 = (uint)((int)f2._rawValue >> 31);
+                    uint sign2 = (uint)((int)f2.RawValue >> 31);
                     man2 = (int)((f2.RawMantissa ^ sign2) - sign2);
 
                     man1 = f1.Mantissa;
@@ -880,7 +883,7 @@ namespace GameLibrary.Mathematics
             }
 
             // Both not finite
-            return f1._rawValue == f2._rawValue ? f1 : NaN;
+            return f1.RawValue == f2.RawValue ? f1 : NaN;
         }
 
         /// <summary>
