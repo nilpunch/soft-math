@@ -1,7 +1,18 @@
 # soft-math - Work in progress
 
-Unity package. Deterministic math library for online games and more. Based on software floating point implementation.  
+Unity package. Deterministic math library for online games and more. Based on software floating point implementation.
+
 Does not reference Unity Engine, so it could be used in a regular C# project.
+
+## Summary
+
+1. [Installation](#installation)
+2. [How to use](#how-to-use)
+   1. [Soft Float](#soft-float)
+   2. [Soft Math](#soft-math)
+   3. [Soft Struct](#soft-structs)
+3. [Resources](#resources)
+4. [License](#license)
 
 ## Installation
 
@@ -16,17 +27,16 @@ See minimum required Unity version in the `package.json` file.
 Library built in such a way that Unity users are most familiar with, but follows C# standards.
 
 Types overview:
-- `SoftFloat` - full replacement for built-in float's
+- `SoftFloat` - full replacement for built-in C# float's
 - `SoftMath` - math library for soft floats
-- `SoftVector3`, `SoftQuaternion`... - math structs, based on soft floats
+- `SoftVector3`, `SoftQuaternion`... - math structs that use soft floats
 
-Each type has a **Soft** prefix in their name, so use the IDE to quickly find what you need.
-
-### SoftFloat
+___
+### Soft Float
 
 The `SoftFloat` type is the main type that you'll need to use for deterministic float calculations.
 
-The `SoftFloat` type can be constructed in three ways:
+Can be constructed in three ways:
 - Explicit cast from float:
 ```csharp
 SoftFloat a = (SoftFloat)1.0f;
@@ -43,7 +53,7 @@ SoftFloat b = (SoftFloat)(-123);
 SoftFloat c = (SoftFloat)uint.MaxValue;
 ```
 
-- Create from raw byte representation
+- Create from raw byte representation:
 ```csharp
 SoftFloat a = SoftFloat.FromRaw(0x00000000); // == 0
 SoftFloat b = SoftFloat.FromRaw(0x3f800000); // == 1
@@ -51,6 +61,14 @@ SoftFloat c = SoftFloat.FromRaw(0xc2f6e979); // == -123.456
 SoftFloat d = SoftFloat.FromRaw(0x7f800000); // == Infinity
 ```
 This is also free, it's just the byte representation of the value.
+
+And there is some shorthands for common values, like:
+```csharp
+SoftFloat inf = SoftFloat.PositiveInfinity;
+SoftFloat a = SoftFloat.One;
+SoftFloat b = SoftFloat.Zero;
+SoftFloat c = SoftFloat.Epsilon; // Smallest precise positive number
+```
 
 The rest of the operations work just like with floats (addition, multiplication, etc.).  
 Note that you should always use a float literal (or a variable that was assigned a float literal before) for explicit casts from floats, since any operation done on floats can be non-deterministic.
@@ -65,15 +83,8 @@ float a = 1.0f;
 SoftFloat b = (SoftFloat)(a + 123.456f); // Float addition here, which may be non-deterministic
 ```
 
-Also, `SoftFloat` has some shorthands for common values, like:
-```csharp
-SoftFloat inf = SoftFloat.PositiveInfinity;
-SoftFloat a = SoftFloat.One;
-SoftFloat b = SoftFloat.Zero;
-SoftFloat c = SoftFloat.Epsilon; // Smallest precise positive number
-```
-
-### Using SoftMath
+___
+### Soft Math
 
 You can use `SoftMath` just like a regular mathematics library:
 ```csharp
@@ -87,10 +98,10 @@ SoftFloat max = SoftMath.Max(SoftFloat.One, SoftFloat.Zero);
 SoftFloat sign = SoftMath.Sign((SoftFloat)(-1));
 ```
 
-### Using Vectors, Quaternions and other
+___
+### Soft Structs
 
-Library provide Unity-like math structs with all the useful operations.
-They are all starts with Soft prefix
+This library provide Unity-like math structs with all the useful operations:
 ```csharp
 SoftVector3 vector = new SoftVector3(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero);
 
@@ -100,6 +111,9 @@ SoftQuaternion quaternion = SoftQuaternion.Identity;
 
 SoftVector3 rotatedVector = quaternion * vector;
 ```
+
+___
+[:arrow_up:Summary](#summary)
 
 ## Resources
 
