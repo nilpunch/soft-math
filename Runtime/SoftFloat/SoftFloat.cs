@@ -1,34 +1,12 @@
-﻿// Mostly from https://github.com/CodesInChaos/SoftFloat
-
-// Copyright (c) 2011 CodesInChaos
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-// and associated documentation files (the "Software"), to deal in the Software without restriction,
-// including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-// and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies
-// or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-// The MIT License (MIT) - http://www.opensource.org/licenses/mit-license.php
-// If you need a different license please contact me
-
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Runtime.CompilerServices;
 
 namespace GameLibrary.Mathematics
 {
-	// Internal representation is identical to IEEE binary32 floating point numbers
-	[DebuggerDisplay("{ToStringInv()}")]
+	/// <summary>
+	/// Software floating point implementation.
+	/// Internal representation is identical to IEEE 754 binary32 floating point numbers.
+	/// </summary>
 	public readonly struct SoftFloat : IEquatable<SoftFloat>, IComparable<SoftFloat>, IComparable, IFormattable
 	{
         private const uint SignMask = 0x80000000;
@@ -37,7 +15,7 @@ namespace GameLibrary.Mathematics
         private const int ExponentBias = 127;
 
         private const uint RawZero = 0;
-        private const uint RawNaN = 0xFFC00000; // Same as float.NaN
+        private const uint RawNaN = 0xFFC00000;
         private const uint RawPositiveInfinity = 0x7F800000;
         private const uint RawNegativeInfinity = RawPositiveInfinity ^ SignMask;
         private const uint RawOne = 0x3F800000;
@@ -115,9 +93,10 @@ namespace GameLibrary.Mathematics
         public static SoftFloat AbsoluteEpsilon => new SoftFloat(RawAbsoluteEpsilon);
         
         /// <summary>
-        /// The smallest value that can be represented as a normalized number in each format.
-        /// Numbers smaller than this can be stored as denormals, but are not held with as much precision.
+        /// The smallest positive value that can be represented as a normalized number in the format.
+        /// Numbers smaller than this can be stored as subnormals, but are not held with as much precision.
         /// </summary>
+        /// <seealso cref="SoftFloat.AbsoluteEpsilon"/>
         public static SoftFloat Epsilon => new SoftFloat(RawNormalEpsilon);
 
         private uint RawMantissa => RawValue & 0x7FFFFF;
@@ -152,9 +131,7 @@ namespace GameLibrary.Mathematics
 
         public string ToString(IFormatProvider provider) => ((float)this).ToString(provider);
 
-        public override string ToString() => ((float)this).ToString();
-
-        public string ToStringInv() => ((float)this).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        public override string ToString() => ((float)this).ToString(System.Globalization.CultureInfo.InvariantCulture);
 
         public bool Equals(SoftFloat other)
         {
@@ -522,7 +499,7 @@ namespace GameLibrary.Mathematics
                 return f2;
             }
 
-			long longMan = (long)man1 * (long)man2;
+			long longMan = man1 * (long)man2;
 			int man = (int)(longMan >> MantissaBits);
             uint absMan = (uint)Math.Abs(man);
 			int rawExp = rawExp1 + rawExp2 - ExponentBias;
@@ -692,7 +669,7 @@ namespace GameLibrary.Mathematics
                 return f2;
             }
 
-			long longMan = ((long)man1 << MantissaBits) / (long)man2;
+			long longMan = ((long)man1 << MantissaBits) / man2;
 			int man = (int)longMan;
 			uint absMan = (uint)Math.Abs(man);
 			int rawExp = rawExp1 - rawExp2 + ExponentBias;
