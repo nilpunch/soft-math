@@ -302,7 +302,7 @@ namespace GameLibrary.Mathematics
         /// Returns a vector that is made from the largest components of two vectors.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftVector3 Max(SoftVector3 a, SoftVector3 b)
+        public static SoftVector3 MaxComponents(SoftVector3 a, SoftVector3 b)
         {
             return new SoftVector3(SoftMath.Max(a.X, b.X), SoftMath.Max(a.Y, b.Y), SoftMath.Max(a.Z, b.Z));
         }
@@ -311,7 +311,7 @@ namespace GameLibrary.Mathematics
         /// Returns a vector that is made from the smallest components of two vectors.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftVector3 Min(SoftVector3 a, SoftVector3 b)
+        public static SoftVector3 MinComponents(SoftVector3 a, SoftVector3 b)
         {
             return new SoftVector3(SoftMath.Min(a.X, b.X), SoftMath.Min(a.Y, b.Y), SoftMath.Min(a.Z, b.Z));
         }
@@ -320,7 +320,7 @@ namespace GameLibrary.Mathematics
         /// Returns the componentwise absolute value of a vector.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftVector3 Abs(SoftVector3 a)
+        public static SoftVector3 AbsComponents(SoftVector3 a)
         {
             return new SoftVector3(SoftMath.Abs(a.X), SoftMath.Abs(a.Y), SoftMath.Abs(a.Z));
         }
