@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace GameLibrary.Mathematics
 {
-    public readonly struct SoftVector3
+    public readonly struct SoftVector3 : IEquatable<SoftVector3>, IFormattable
     {
         public readonly SoftFloat X;
         public readonly SoftFloat Y;
@@ -61,12 +61,41 @@ namespace GameLibrary.Mathematics
         public static SoftVector3 Backward => new SoftVector3(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.MinusOne);
         
         /// <summary>
+        /// Returns true if the given vector is exactly equal to this vector.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object other) => other is SoftVector3 otherVector && Equals(otherVector);
+
+        /// <summary>
+        /// Returns true if the given vector is exactly equal to this vector.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(SoftVector3 other)
+        {
+            return X == other.X && Y == other.Y && Z == other.Z;
+        }
+
+        public override string ToString() => ToString("F2", System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+
+        public string ToString(string format) => ToString(format, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+        
+        public string ToString(IFormatProvider provider) => ToString("F2", provider);
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            return string.Format("({0}, {1}, {2})", X.ToString(format, formatProvider), Y.ToString(format, formatProvider), Z.ToString(format, formatProvider));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode() => X.GetHashCode() ^ Y.GetHashCode() << 2 ^ Z.GetHashCode() >> 2;
+        
+        /// <summary>
         /// Returns the componentwise addition.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftVector3 operator +(SoftVector3 a, SoftVector3 b)
         {
-            return new SoftVector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+            return new SoftVector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
         
         /// <summary>
@@ -86,34 +115,43 @@ namespace GameLibrary.Mathematics
         {
             return b + a;
         }
-        
+
+        /// <summary>
+        /// Returns the componentwise negotiation.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftVector3 operator -(SoftVector3 a)
+        {
+            return new SoftVector3(-a.X, -a.Y, -a.Z);
+        }
+
         /// <summary>
         /// Returns the componentwise subtraction.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftVector3 operator -(SoftVector3 a, SoftVector3 b)
         {
-            return new SoftVector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+            return -b + a;
         }
-        
+
         /// <summary>
         /// Returns the componentwise subtraction.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftVector3 operator -(SoftVector3 a, SoftFloat b)
         {
-            return new SoftVector3(a.X - b, a.Y - b, a.Z - b);
+            return -b + a;
         }
-        
+
         /// <summary>
-        /// Returns the componentwise addition.
+        /// Returns the componentwise subtraction.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftVector3 operator -(SoftFloat a, SoftVector3 b)
         {
-            return b - a;
+            return -b + a;
         }
-        
+
         /// <summary>
         /// Returns the componentwise multiplication.
         /// </summary>
@@ -169,13 +207,13 @@ namespace GameLibrary.Mathematics
         }
         
         /// <summary>
-        /// Returns true if vectors are equal, false otherwise.
+        /// Returns true if vectors are approximately equal, false otherwise.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(SoftVector3 a, SoftVector3 b) => ApproximatelyEqual(a, b, SoftFloat.Epsilon);
+        public static bool operator ==(SoftVector3 a, SoftVector3 b) => ApproximatelyEqual(a, b);
 
         /// <summary>
-        /// Returns true if vectors are not equal, false otherwise.
+        /// Returns true if vectors are not approximately equal, false otherwise.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(SoftVector3 a, SoftVector3 b) => !(a == b);
@@ -244,14 +282,12 @@ namespace GameLibrary.Mathematics
         public static SoftVector3 Normalize(SoftVector3 a)
         {
             SoftFloat length = Length(a);
-            if (length < SoftFloat.Epsilon)
-                throw new Exception("Vector length close to zero.");
             return a / length;
         }
 
         /// <summary>
         /// Returns a safe normalized version of a vector.
-        /// Returns the given default value when 1 / length(x) does not produce a finite number.
+        /// Returns the given default value when vector length close to zero.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftVector3 NormalizeSafe(SoftVector3 a, SoftVector3 defaultValue = new SoftVector3())
@@ -290,8 +326,18 @@ namespace GameLibrary.Mathematics
         }
         
         /// <summary>
+        /// Compares two vectors with <see cref="SoftFloat.Epsilon"/> and returns true if they are similar.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ApproximatelyEqual(SoftVector3 a, SoftVector3 b)
+        {
+            return ApproximatelyEqual(a, b, SoftFloat.Epsilon);
+        }
+        
+        /// <summary>
         /// Compares two vectors with some epsilon and returns true if they are similar.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyEqual(SoftVector3 a, SoftVector3 b, SoftFloat epsilon)
         {
             return DistanceSqr(a, b) < epsilon;
