@@ -30,6 +30,8 @@ Types overview:
 - `SoftMath` - math library for soft floats
 - `SoftVector3`, `SoftQuaternion`... - math structs that use soft floats
 
+Each type has a **Soft** prefix in their name, so use the IDE to quickly find what you need.
+
 ### Soft Float
 
 The `SoftFloat` type is the main type that you'll need to use for deterministic float calculations.
