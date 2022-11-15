@@ -1,7 +1,6 @@
 # soft-math - Work in progress
 
-Unity package. Deterministic math library for online games and more. Based on software floating point implementation.
-
+Unity package. Deterministic math library for online games and more. Based on software floating point implementation.  
 Does not reference Unity Engine, so it could be used in a regular C# project.
 
 ## Summary
@@ -31,7 +30,8 @@ Types overview:
 - `SoftMath` - math library for soft floats
 - `SoftVector3`, `SoftQuaternion`... - math structs that use soft floats
 
-___
+Each type has a **Soft** prefix in their name, so use the IDE to quickly find what you need.
+
 ### Soft Float
 
 The `SoftFloat` type is the main type that you'll need to use for deterministic float calculations.
@@ -83,7 +83,6 @@ float a = 1.0f;
 SoftFloat b = (SoftFloat)(a + 123.456f); // Float addition here, which may be non-deterministic
 ```
 
-___
 ### Soft Math
 
 You can use `SoftMath` just like a regular mathematics library:
@@ -98,7 +97,6 @@ SoftFloat max = SoftMath.Max(SoftFloat.One, SoftFloat.Zero);
 SoftFloat sign = SoftMath.Sign((SoftFloat)(-1));
 ```
 
-___
 ### Soft Structs
 
 This library provide Unity-like math structs with all the useful operations:
@@ -112,8 +110,7 @@ SoftQuaternion quaternion = SoftQuaternion.Identity;
 SoftVector3 rotatedVector = quaternion * vector;
 ```
 
-___
-[:arrow_up:Summary](#summary)
+### [:arrow_up:Go Up](#summary)
 
 ## Resources
 
