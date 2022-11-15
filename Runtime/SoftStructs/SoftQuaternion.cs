@@ -105,26 +105,28 @@ namespace GameLibrary.Mathematics
         }
 
         /// <summary>
-        /// Returns vector transformed by the quaternion.
+        /// Returns the vector transformed by the quaternion, including scale and rotation.
+        /// Also known as sandwich product.
         /// </summary>
-        public static SoftVector3 operator *(SoftQuaternion rotation, SoftVector3 vector)
+        public static SoftVector3 operator *(SoftQuaternion quaternion, SoftVector3 vector)
         {
-            SoftFloat twoX = rotation.X * (SoftFloat)2f;
-            SoftFloat twoY = rotation.Y * (SoftFloat)2f;
-            SoftFloat twoZ = rotation.Z * (SoftFloat)2f;
-            SoftFloat xx = rotation.X * twoX;
-            SoftFloat yy = rotation.Y * twoY;
-            SoftFloat zz = rotation.Z * twoZ;
-            SoftFloat xy = rotation.X * twoY;
-            SoftFloat xz = rotation.X * twoZ;
-            SoftFloat yz = rotation.Y * twoZ;
-            SoftFloat wx = rotation.W * twoX;
-            SoftFloat wy = rotation.W * twoY;
-            SoftFloat wz = rotation.W * twoZ;
+            SoftFloat twoX = quaternion.X * (SoftFloat)2f;
+            SoftFloat twoY = quaternion.Y * (SoftFloat)2f;
+            SoftFloat twoZ = quaternion.Z * (SoftFloat)2f;
+            SoftFloat xx = quaternion.X * quaternion.X;
+            SoftFloat yy = quaternion.Y * quaternion.Y;
+            SoftFloat zz = quaternion.Z * quaternion.Z;
+            SoftFloat ww = quaternion.W * quaternion.W;
+            SoftFloat xy2 = quaternion.X * twoY;
+            SoftFloat xz2 = quaternion.X * twoZ;
+            SoftFloat yz2 = quaternion.Y * twoZ;
+            SoftFloat wx2 = quaternion.W * twoX;
+            SoftFloat wy2 = quaternion.W * twoY;
+            SoftFloat wz2 = quaternion.W * twoZ;
             SoftVector3 result = new SoftVector3(
-                (SoftFloat.One - (yy + zz)) * vector.X + (xy - wz) * vector.Y + (xz + wy) * vector.Z,
-                (xy + wz) * vector.X + (SoftFloat.One - (xx + zz)) * vector.Y + (yz - wx) * vector.Z,
-                (xz - wy) * vector.X + (yz + wx) * vector.Y + (SoftFloat.One - (xx + yy)) * vector.Z);
+                (ww + xx - yy - zz) * vector.X + (xy2 - wz2) * vector.Y + (xz2 + wy2) * vector.Z,
+                (xy2 + wz2) * vector.X + (ww - xx + yy - zz) * vector.Y + (yz2 - wx2) * vector.Z,
+                (xz2 - wy2) * vector.X + (yz2 + wx2) * vector.Y + (ww - xx - yy + zz) * vector.Z);
             return result;
         }
 
@@ -208,7 +210,7 @@ namespace GameLibrary.Mathematics
         /// <summary>
         /// Returns a normalized version of a quaternion.
         /// </summary>
-        [MethodImpl((MethodImplOptions) 256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftQuaternion Normalize(SoftQuaternion a)
         {
             SoftFloat length = Length(a);
@@ -243,7 +245,7 @@ namespace GameLibrary.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyEqual(SoftQuaternion a, SoftQuaternion b, SoftFloat epsilon)
         {
-            return Dot(a, b) > SoftFloat.One - epsilon;
+            return SoftMath.Abs(Dot(a, b)) > SoftFloat.One - epsilon;
         }
     }
 }

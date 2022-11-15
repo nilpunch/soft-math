@@ -75,6 +75,22 @@
             }
             return val2;
         }
+        
+        /// <summary>
+        /// Compares two soft floats with <see cref="SoftFloat.Epsilon"/> and returns true if they are similar.
+        /// </summary>
+        public static bool ApproximatelyEqual(SoftFloat a, SoftFloat b)
+        {
+	        return ApproximatelyEqual(a, b, SoftFloat.Epsilon);
+        }
+        
+        /// <summary>
+        /// Compares two soft floats with some epsilon and returns true if they are similar.
+        /// </summary>
+        public static bool ApproximatelyEqual(SoftFloat a, SoftFloat b, SoftFloat epsilon)
+        {
+	        return Abs(a - b) < epsilon;
+        }
 
 		/// <summary>
 		/// Returns the remainder when dividing x by y.
