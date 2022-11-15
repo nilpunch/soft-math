@@ -1,46 +1,18 @@
 ﻿namespace GameLibrary.Mathematics
 {
-	public static partial class SoftMath
+	/// <summary>
+    /// This is bitwise implementation of float operations. Use <see cref="SoftMath"/> instead.
+    /// </summary>
+	public static class SoftMathTrigonometry
 	{
-		private const uint RawPI = 0x40490fdb; // 3.1415926535897932384626433832795
-		private const uint RawHalfPI = 0x3fc90fdb; // 1.5707963267948966192313216916398
-		private const uint RawTwoPI = 0x40c90fdb; // 6.283185307179586476925286766559
-		private const uint RawPIOver4 = 0x3f490fdb; // 0.78539816339744830961566084581988
-		private const uint RawPITimes3Over4 = 0x4016cbe4; // 2.3561944901923449288469825374596
-		
-		private const uint RawDeg2Rad = 0x3c8efa35; // 0.017453292
-		private const uint RawRad2Deg = 0x42652ee1; // // 57.29578049
-		
-		/// <summary>
-		/// The ratio of a circle's circumference to its diameter. Approximately 3.141592...
-		/// </summary>
-		public static SoftFloat PI => SoftFloat.FromRaw(RawPI);
-		
-		/// <summary>
-		/// PI / 2. Approximately 1.570798...
-		/// </summary>
-		public static SoftFloat PIHalf => SoftFloat.FromRaw(RawHalfPI);
+		public const uint RawPI = 0x40490fdb; // 3.1415926535897932384626433832795
+    	public const uint RawHalfPI = 0x3fc90fdb; // 1.5707963267948966192313216916398
+    	public const uint RawTwoPI = 0x40c90fdb; // 6.283185307179586476925286766559
+    	public const uint RawPIOver4 = 0x3f490fdb; // 0.78539816339744830961566084581988
+    	public const uint RawPITimes3Over4 = 0x4016cbe4; // 2.3561944901923449288469825374596
+    	public const uint RawDeg2Rad = 0x3c8efa35; // 0.017453292
+    	public const uint RawRad2Deg = 0x42652ee1; // // 57.29578049
 
-		/// <summary>
-		/// PI / 4. Approximately 0.785398...
-		/// </summary>
-		public static SoftFloat PIOver4 => SoftFloat.FromRaw(RawPIOver4);
-
-		/// <summary>
-		/// PI * 2. Approximately 6.283185...
-		/// </summary>
-		public static SoftFloat TwoPI => SoftFloat.FromRaw(RawTwoPI);
-
-		/// <summary>
-		/// Degrees-to-radians conversion constant.
-		/// </summary>
-		public static SoftFloat Deg2Rad => SoftFloat.FromRaw(RawDeg2Rad);
-		
-		/// <summary>
-		/// Radians-to-degrees conversion constant.
-		/// </summary>
-		public static SoftFloat Rad2Deg => SoftFloat.FromRaw(RawRad2Deg);
-		
 		/// <summary>
 		/// Returns the sine of x.
 		/// </summary>
@@ -177,7 +149,7 @@
 			{
 				SoftFloat t1 = SoftFloat.FromRaw(((uint)ha) & 0xfffff000);
 				SoftFloat t2 = a - t1;
-				w = Sqrt(t1 * t1 - (b * (-b) - t2 * (a + t1)));
+				w = SoftMathArithmetic.Sqrt(t1 * t1 - (b * (-b) - t2 * (a + t1)));
 			}
 			else
 			{
@@ -186,7 +158,7 @@
 				SoftFloat y2 = b - y1;
 				SoftFloat t1 = SoftFloat.FromRaw(((uint)ha) + 0x00800000);
 				SoftFloat t2 = a - t1;
-				w = Sqrt(t1 * y1 - (w * (-w) - (t1 * y2 + t2 * b)));
+				w = SoftMathArithmetic.Sqrt(t1 * y1 - (w * (-w) - (t1 * y2 + t2 * b)));
 			}
 
 			if (k != 0)
@@ -269,7 +241,7 @@
 			}
 			else
 			{
-				x = Abs(x);
+				x = SoftMathArithmetic.Abs(x);
 				if (ix < 0x3f980000)
 				{
 					/* |x| < 1.1875 */
@@ -410,7 +382,7 @@
 			/* z = atan(|y/x|) with correct underflow */
 			SoftFloat z = (m & 2) != 0 && iy + (26 << 23) < ix
 				? SoftFloat.Zero /*|y/x| < 0x1p-26, x < 0 */
-				: Atan(Abs(y / x));
+				: Atan(SoftMathArithmetic.Abs(y / x));
 
 			switch (m)
 			{
@@ -487,14 +459,14 @@
 			if ((hx >> 31) != 0)
 			{
 				z = ((SoftFloat)1.0f + x) * (SoftFloat)0.5f;
-				s = Sqrt(z);
+				s = SoftMathArithmetic.Sqrt(z);
 				w = R(z) * s - SoftFloat.FromRaw(pio2Lou32);
 				return (SoftFloat)2.0 * (SoftFloat.FromRaw(pio2HiU32) - (s + w));
 			}
 
 			/* x > 0.5 */
 			z = ((SoftFloat)1.0f - x) * (SoftFloat)0.5f;
-			s = Sqrt(z);
+			s = SoftMathArithmetic.Sqrt(z);
 			hx = s.RawValue;
 			SoftFloat df = SoftFloat.FromRaw(hx & 0xfffff000);
 			SoftFloat c = (z - df * df) / (s + df);
@@ -505,6 +477,9 @@
 		/// <summary>
 		/// Returns the arcsine of x.
 		/// </summary>
-		public static SoftFloat Asin(SoftFloat x) => SoftFloat.FromRaw(RawHalfPI) - Acos(x);
+		public static SoftFloat Asin(SoftFloat x)
+		{
+			return SoftFloat.FromRaw(RawHalfPI) - Acos(x);
+		}
 	}
 }

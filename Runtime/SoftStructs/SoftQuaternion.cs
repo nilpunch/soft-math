@@ -168,7 +168,7 @@ namespace GameLibrary.Mathematics
         {
             return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
         }
-        
+
         /// <summary>
         /// Returns the length of a quaternion.
         /// </summary>
@@ -186,7 +186,7 @@ namespace GameLibrary.Mathematics
         {
             return Dot(a, a);
         }
-        
+
         /// <summary>
         /// Returns the conjugate of a quaternion.
         /// </summary>
@@ -195,7 +195,7 @@ namespace GameLibrary.Mathematics
         {
             return new SoftQuaternion(-a.X, -a.Y, -a.Z, a.W);
         }
-        
+
         /// <summary>
         /// Returns the inverse of a quaternion.
         /// </summary>
@@ -206,7 +206,7 @@ namespace GameLibrary.Mathematics
             SoftQuaternion conjugation = Conjugate(a);
             return conjugation / lengthSqr;
         }
-        
+
         /// <summary>
         /// Returns a normalized version of a quaternion.
         /// </summary>
@@ -219,7 +219,7 @@ namespace GameLibrary.Mathematics
         
         /// <summary>
         /// Returns a safe normalized version of a quaternion.
-        /// Returns the given default value when quaternion scale close to zero.
+        /// Returns the given default value when quaternion length close to zero.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftQuaternion NormalizeSafe(SoftQuaternion a, SoftQuaternion defaultValue = new SoftQuaternion())
