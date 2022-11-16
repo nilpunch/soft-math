@@ -99,7 +99,7 @@ SoftFloat sign = SoftMath.Sign((SoftFloat)(-1));
 
 ### Soft Structs
 
-This library provide Unity-like math structs with all the useful operations:
+Package provide familiar Unity-like math structs with everything you need:
 ```csharp
 SoftVector3 vector = new SoftVector3(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero);
 
@@ -107,7 +107,7 @@ SoftVector3 cross = SoftVector3.Cross(vector, SoftVector3.Up);
 
 SoftQuaternion quaternion = SoftQuaternion.Identity;
 
-SoftVector3 rotatedVector = quaternion * vector;
+SoftVector3 transformedVector = quaternion * vector;
 ```
 
 ### [:arrow_up:Go Up](#summary)
