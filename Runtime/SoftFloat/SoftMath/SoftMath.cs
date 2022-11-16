@@ -132,7 +132,8 @@ namespace GameLibrary.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyEqual(SoftFloat x, SoftFloat y, SoftFloat epsilon)
         {
-	        return Abs(x - y) < epsilon;
+	        var difference = Abs(x - y);
+	        return difference <= epsilon || difference <= Max(Abs(x), Abs(y)) * epsilon;
         }
 
         /// <summary>
