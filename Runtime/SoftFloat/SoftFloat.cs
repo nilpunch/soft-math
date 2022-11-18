@@ -90,6 +90,7 @@ namespace GameLibrary.Mathematics
         /// <summary>
         /// The smallest positive number that can be distinguished from zero. This is the absolute lower limit of the format.
         /// </summary>
+        /// <seealso cref="SoftFloat.Epsilon"/>
         public static SoftFloat AbsoluteEpsilon => new SoftFloat(RawAbsoluteEpsilon);
         
         /// <summary>

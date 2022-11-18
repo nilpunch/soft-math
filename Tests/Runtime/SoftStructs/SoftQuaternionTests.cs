@@ -8,12 +8,12 @@ namespace GameLibrary.Mathematics.Tests
         public static void DotProductShouldBeOneOrNegativeOneOnSameRotations()
         {
             // Arrange
-            SoftQuaternion rotation180 = new SoftQuaternion(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
-            SoftQuaternion rotationMinus180 = new SoftQuaternion(-SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
+            SoftQuaternionGeneral rotation180 = new SoftQuaternionGeneral(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
+            SoftQuaternionGeneral rotationMinus180 = new SoftQuaternionGeneral(-SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
             
             // Act
-            SoftFloat negativeDot = SoftQuaternion.Dot(rotation180, rotationMinus180);
-            SoftFloat dot = SoftQuaternion.Dot(rotation180, rotation180);
+            SoftFloat negativeDot = SoftQuaternionGeneral.Dot(rotation180, rotationMinus180);
+            SoftFloat dot = SoftQuaternionGeneral.Dot(rotation180, rotation180);
             
             // Assert
             Assert.IsTrue(SoftMath.ApproximatelyEqual(negativeDot, SoftFloat.MinusOne));
@@ -25,7 +25,7 @@ namespace GameLibrary.Mathematics.Tests
         {
             // Arrange
             SoftVector3 point = SoftVector3.Up;
-            SoftQuaternion rotation180 = new SoftQuaternion(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
+            SoftQuaternionGeneral rotation180 = new SoftQuaternionGeneral(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
             
             // Act
             SoftVector3 transformed = rotation180 * point;
@@ -39,8 +39,8 @@ namespace GameLibrary.Mathematics.Tests
         {
             // Arrange
             SoftVector3 point = SoftVector3.Up;
-            SoftQuaternion rotation180 = new SoftQuaternion(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
-            SoftQuaternion scaling9 = new SoftQuaternion(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, (SoftFloat)3f);
+            SoftQuaternionGeneral rotation180 = new SoftQuaternionGeneral(SoftFloat.One, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero);
+            SoftQuaternionGeneral scaling9 = new SoftQuaternionGeneral(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, (SoftFloat)3f);
 
             // Act
             SoftVector3 transformed = scaling9 * rotation180 * point;

@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace GameLibrary.Mathematics
 {
+    /// <summary>
+    /// Represent rotation. Normalized quaternion.
+    /// </summary>
     public readonly struct SoftQuaternion : IEquatable<SoftQuaternion>, IFormattable
     {
         public readonly SoftFloat X;
@@ -14,19 +17,25 @@ namespace GameLibrary.Mathematics
         /// Constructs a quaternion from four SoftFloat values.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SoftQuaternion(SoftFloat x, SoftFloat y, SoftFloat z, SoftFloat w)
+        private SoftQuaternion(SoftFloat x, SoftFloat y, SoftFloat z, SoftFloat w)
         {
             X = x;
             Y = y;
             Z = z;
             W = w;
         }
-        
+
         /// <summary>
         /// The identity rotation.
         /// </summary>
-        public static SoftQuaternion Identity => new SoftQuaternion(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.One);
-
+        public static SoftQuaternion Identity =>
+            new SoftQuaternion(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.One);
+        
+        /// <summary>
+        /// Epsilon for comparison operations.
+        /// </summary>
+        public static SoftFloat CalculationsEpsilon => (SoftFloat) 0.000001f;
+        
         /// <summary>
         /// Returns true if the given quaternion is exactly equal to this quaternion.
         /// </summary>
@@ -42,26 +51,31 @@ namespace GameLibrary.Mathematics
             return X == other.X && Y == other.Y && Z == other.Z && W == other.W;
         }
 
-        public override string ToString() => ToString("F2", System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+        public override string ToString() =>
+            ToString("F2", System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
 
-        public string ToString(string format) => ToString(format, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-        
+        public string ToString(string format) =>
+            ToString(format, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+
         public string ToString(IFormatProvider provider) => ToString("F2", provider);
 
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            return string.Format("({0}, {1}, {2}, {3})", X.ToString(format, formatProvider), Y.ToString(format, formatProvider), Z.ToString(format, formatProvider), Y.ToString(format, formatProvider));
+            return string.Format("({0}, {1}, {2}, {3})", X.ToString(format, formatProvider),
+                Y.ToString(format, formatProvider), Z.ToString(format, formatProvider),
+                Y.ToString(format, formatProvider));
         }
-        
-        public override int GetHashCode() => X.GetHashCode() ^ Y.GetHashCode() << 2 ^ Z.GetHashCode() >> 2 ^ W.GetHashCode() >> 1;
+
+        public override int GetHashCode() =>
+            X.GetHashCode() ^ Y.GetHashCode() << 2 ^ Z.GetHashCode() >> 2 ^ W.GetHashCode() >> 1;
         
         /// <summary>
         /// Returns the componentwise addition.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion operator +(SoftQuaternion a, SoftQuaternion b)
+        public static SoftQuaternionGeneral operator +(SoftQuaternion a, SoftQuaternion b)
         {
-            return new SoftQuaternion(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
+            return new SoftQuaternionGeneral(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
         }
         
         /// <summary>
@@ -77,7 +91,7 @@ namespace GameLibrary.Mathematics
         /// Returns the componentwise subtraction.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion operator -(SoftQuaternion a, SoftQuaternion b)
+        public static SoftQuaternionGeneral operator -(SoftQuaternion a, SoftQuaternion b)
         {
             return -b + a;
         }
@@ -88,35 +102,34 @@ namespace GameLibrary.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftQuaternion operator *(SoftQuaternion a, SoftQuaternion b)
         {
-            return new SoftQuaternion(
+            return EnsureNormalization(new SoftQuaternion(
                 a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y,
                 a.W * b.Y + a.Y * b.W + a.Z * b.X - a.X * b.Z,
                 a.W * b.Z + a.Z * b.W + a.X * b.Y - a.Y * b.X,
-                a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z);
+                a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z));
         }
         
         /// <summary>
         /// Returns the componentwise multiplication.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion operator *(SoftQuaternion a, SoftFloat b)
+        public static SoftQuaternionGeneral operator *(SoftQuaternion a, SoftFloat b)
         {
-            return new SoftQuaternion(a.X * b, a.Y * b, a.Z * b, a.W * b);
+            return new SoftQuaternionGeneral(a.X * b, a.Y * b, a.Z * b, a.W * b);
         }
 
         /// <summary>
-        /// Returns the vector transformed by the quaternion, including scale and rotation.
+        /// Returns the vector rotated by the quaternion.
         /// Also known as sandwich product.
         /// </summary>
         public static SoftVector3 operator *(SoftQuaternion quaternion, SoftVector3 vector)
         {
-            SoftFloat twoX = quaternion.X * (SoftFloat)2f;
-            SoftFloat twoY = quaternion.Y * (SoftFloat)2f;
-            SoftFloat twoZ = quaternion.Z * (SoftFloat)2f;
-            SoftFloat xx = quaternion.X * quaternion.X;
-            SoftFloat yy = quaternion.Y * quaternion.Y;
-            SoftFloat zz = quaternion.Z * quaternion.Z;
-            SoftFloat ww = quaternion.W * quaternion.W;
+            SoftFloat twoX = quaternion.X * (SoftFloat) 2f;
+            SoftFloat twoY = quaternion.Y * (SoftFloat) 2f;
+            SoftFloat twoZ = quaternion.Z * (SoftFloat) 2f;
+            SoftFloat xx2 = quaternion.X * twoX;
+            SoftFloat yy2 = quaternion.Y * twoY;
+            SoftFloat zz2 = quaternion.Z * twoZ;
             SoftFloat xy2 = quaternion.X * twoY;
             SoftFloat xz2 = quaternion.X * twoZ;
             SoftFloat yz2 = quaternion.Y * twoZ;
@@ -124,9 +137,9 @@ namespace GameLibrary.Mathematics
             SoftFloat wy2 = quaternion.W * twoY;
             SoftFloat wz2 = quaternion.W * twoZ;
             SoftVector3 result = new SoftVector3(
-                (ww + xx - yy - zz) * vector.X + (xy2 - wz2) * vector.Y + (xz2 + wy2) * vector.Z,
-                (xy2 + wz2) * vector.X + (ww - xx + yy - zz) * vector.Y + (yz2 - wx2) * vector.Z,
-                (xz2 - wy2) * vector.X + (yz2 + wx2) * vector.Y + (ww - xx - yy + zz) * vector.Z);
+                (SoftFloat.One - (yy2 + zz2)) * vector.X + (xy2 - wz2) * vector.Y + (xz2 + wy2) * vector.Z,
+                (xy2 + wz2) * vector.X + (SoftFloat.One - (xx2 + zz2)) * vector.Y + (yz2 - wx2) * vector.Z,
+                (xz2 - wy2) * vector.X + (yz2 + wx2) * vector.Y + (SoftFloat.One - (xx2 + yy2)) * vector.Z);
             return result;
         }
 
@@ -143,11 +156,11 @@ namespace GameLibrary.Mathematics
         /// Returns the componentwise division.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion operator /(SoftQuaternion a, SoftFloat b)
+        public static SoftQuaternionGeneral operator /(SoftQuaternion a, SoftFloat b)
         {
-            return new SoftQuaternion(a.X / b, a.Y / b, a.Z / b, a.W / b);
+            return new SoftQuaternionGeneral(a.X / b, a.Y / b, a.Z / b, a.W / b);
         }
-
+        
         /// <summary>
         /// Returns true if quaternions are approximately equal, false otherwise.
         /// </summary>
@@ -159,7 +172,7 @@ namespace GameLibrary.Mathematics
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(SoftQuaternion a, SoftQuaternion b) => !(a == b);
-        
+
         /// <summary>
         /// The dot product between two rotations.
         /// </summary>
@@ -202,43 +215,110 @@ namespace GameLibrary.Mathematics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftQuaternion Inverse(SoftQuaternion a)
         {
-            SoftFloat lengthSqr = LengthSqr(a);
-            SoftQuaternion conjugation = Conjugate(a);
-            return conjugation / lengthSqr;
+            return Conjugate(a);
         }
 
         /// <summary>
         /// Returns a normalized version of a quaternion.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion Normalize(SoftQuaternion a)
+        public static SoftQuaternion Normalize(SoftQuaternionGeneral a)
         {
-            SoftFloat length = Length(a);
-            return a / length;
+            return FromNormalized(SoftQuaternionGeneral.Normalize(a));
         }
-        
+
         /// <summary>
         /// Returns a safe normalized version of a quaternion.
         /// Returns the given default value when quaternion length close to zero.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion NormalizeSafe(SoftQuaternion a, SoftQuaternion defaultValue = new SoftQuaternion())
+        public static SoftQuaternion NormalizeSafe(SoftQuaternionGeneral a, SoftQuaternion defaultValue = new SoftQuaternion())
         {
-            SoftFloat sqrLength = LengthSqr(a);
+            SoftFloat sqrLength = SoftQuaternionGeneral.LengthSqr(a);
             if (sqrLength < SoftFloat.Epsilon)
                 return defaultValue;
-            return a / SoftMath.Sqrt(sqrLength);
+            return FromNormalized(a / SoftMath.Sqrt(sqrLength));
         }
 
         /// <summary>
-        /// Compares two quaternions with <see cref="SoftFloat.Epsilon"/> and returns true if they are similar.
+        /// Returns a spherical interpolation between two quaternions.
+        /// Non-commutative, torque-minimal, constant velocity.
+        /// </summary>
+        public static SoftQuaternion Slerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t, bool longPath = false)
+        {
+            // Calculate angle between them.
+            SoftFloat cosHalfTheta = Dot(a, b);
+
+            if (longPath)
+            {
+                if (cosHalfTheta > SoftFloat.Zero)
+                {
+                    b = -b;
+                    cosHalfTheta = -cosHalfTheta;
+                }
+            }
+            else
+            {
+                if (cosHalfTheta < SoftFloat.Zero)
+                {
+                    b = -b;
+                    cosHalfTheta = -cosHalfTheta;
+                }
+            }
+
+            // If a = b or a = b then theta = 0 then we can return interpolation between a and b
+            if (SoftMath.Abs(cosHalfTheta) > SoftFloat.One - CalculationsEpsilon)
+            {
+                return Nlerp(a, b, t, longPath);
+            }
+
+            SoftFloat halfTheta = SoftMath.Acos(cosHalfTheta);
+            SoftFloat sinHalfTheta = SoftMath.Sin(halfTheta);
+
+            SoftFloat influenceA = SoftMath.Sin((SoftFloat.One - t) * halfTheta) / sinHalfTheta;
+            SoftFloat influenceB = SoftMath.Sin(t * halfTheta) / sinHalfTheta;
+
+            return EnsureNormalization(FromNormalized(a * influenceA + b * influenceB));
+        }
+
+        /// <summary>
+        /// Returns a normalized componentwise interpolation between two quaternions.
+        /// Commutative, torque-minimal, non-constant velocity.
+        /// </summary>
+        public static SoftQuaternion Nlerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t, bool longPath = false)
+        {
+            SoftFloat dot = Dot(a, b);
+
+            if (longPath)
+            {
+                if (dot > SoftFloat.Zero)
+                {
+                    b = -b;
+                }
+            }
+            else
+            {
+                if (dot < SoftFloat.Zero)
+                {
+                    b = -b;
+                }
+            }
+
+            SoftQuaternionGeneral generalA = SoftQuaternionGeneral.FromNormalized(a);
+            SoftQuaternionGeneral generalB = SoftQuaternionGeneral.FromNormalized(b);
+            
+            return Normalize(generalA * (SoftFloat.One - t) + generalB * t);
+        }
+
+        /// <summary>
+        /// Compares two quaternions with <see cref="SoftQuaternion.CalculationsEpsilon"/> and returns true if they are similar.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyEqual(SoftQuaternion a, SoftQuaternion b)
         {
-            return ApproximatelyEqual(a, b, SoftFloat.Epsilon);
+            return ApproximatelyEqual(a, b, CalculationsEpsilon);
         }
-        
+
         /// <summary>
         /// Compares two quaternions with some epsilon and returns true if they are similar.
         /// </summary>
@@ -246,6 +326,64 @@ namespace GameLibrary.Mathematics
         public static bool ApproximatelyEqual(SoftQuaternion a, SoftQuaternion b, SoftFloat epsilon)
         {
             return SoftMath.Abs(Dot(a, b)) > SoftFloat.One - epsilon;
+        }
+
+        /// <summary>
+        /// Check quaternion for normalization and re-normalize it if needed.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftQuaternion EnsureNormalization(SoftQuaternion a)
+        {
+            SoftFloat dot = Dot(a, a);
+
+            if (SoftMath.Abs(SoftFloat.One - dot) > CalculationsEpsilon)
+            {
+                return FromNormalized(a / SoftMath.Sqrt(dot));
+            }
+            
+            return a;
+        }
+
+        /// <summary>
+        /// Constructs normalized quaternion from normalized general one.
+        /// Does not check for normalization.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static SoftQuaternion FromNormalized(SoftQuaternionGeneral quaternion)
+        {
+            return new SoftQuaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+        }
+
+        public static class Radians
+        {
+            /// <summary>
+            /// Returns a quaternion representing a rotation around a unit axis by an angle in radians.
+            /// The rotation direction is clockwise when looking along the rotation axis towards the origin.
+            /// </summary>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static SoftQuaternion AxisAngle(SoftVector3 axis, SoftFloat angle)
+            {
+                axis = SoftVector3.Normalize(axis);
+                SoftFloat sin = SoftMath.Sin((SoftFloat) 0.5f * angle);
+                SoftFloat cos = SoftMath.Cos((SoftFloat) 0.5f * angle);
+                return new SoftQuaternion(axis.X * sin, axis.Y * sin, axis.Z * sin, cos);
+            }
+        }
+        
+        public static class Degrees
+        {
+            /// <summary>
+            /// Returns a quaternion representing a rotation around a unit axis by an angle in degrees.
+            /// The rotation direction is clockwise when looking along the rotation axis towards the origin.
+            /// </summary>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static SoftQuaternion AxisAngle(SoftVector3 axis, SoftFloat angle)
+            {
+                axis = SoftVector3.Normalize(axis);
+                SoftFloat sin = SoftMath.Sin((SoftFloat) 0.5f * angle * SoftMath.Deg2Rad);
+                SoftFloat cos = SoftMath.Cos((SoftFloat) 0.5f * angle * SoftMath.Deg2Rad);
+                return new SoftQuaternion(axis.X * sin, axis.Y * sin, axis.Z * sin, cos);
+            }
         }
     }
 }
