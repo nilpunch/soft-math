@@ -353,48 +353,6 @@ namespace GameLibrary.Mathematics
                     (SoftFloat)0.25f * s,
                     (sideAxis.Y - rotatedUp.X) / s);
             }
-
-            // Another method
-            
-            //Sum of diagonal elements
-            SoftFloat matrixTrace = sideAxis.X + rotatedUp.Y + lookAt.Z;
-            if (matrixTrace > SoftFloat.Zero)
-            {
-                SoftFloat s = (SoftFloat)0.5f / SoftMath.Sqrt(matrixTrace + SoftFloat.One);
-                return new SoftQuaternion(
-                    (rotatedUp.Z - lookAt.Y) * s,
-                    (lookAt.X - sideAxis.Z) * s,
-                    (sideAxis.Y - rotatedUp.X) * s,
-                    (SoftFloat)(SoftFloat)0.25f / s);
-            }
-            
-            if (sideAxis.X > rotatedUp.Y && sideAxis.X > lookAt.Z)
-            {
-                SoftFloat s = SoftMath.Sqrt(SoftFloat.One + sideAxis.X - rotatedUp.Y - lookAt.Z) * (SoftFloat)2.0f;
-                return new SoftQuaternion(
-                    (SoftFloat)0.25f * s,
-                    (rotatedUp.X + sideAxis.Y) / s,
-                    (lookAt.X + sideAxis.Z) / s,
-                    (rotatedUp.Z - lookAt.Y) / s);
-            }
-            else if (rotatedUp.Y > lookAt.Z)
-            {
-                SoftFloat s = SoftMath.Sqrt(SoftFloat.One + rotatedUp.Y - sideAxis.X - lookAt.Z) * (SoftFloat)2.0f;
-                return new SoftQuaternion(
-                    (rotatedUp.X + sideAxis.Y) / s,
-                    (SoftFloat)0.25f * s,
-                    (lookAt.Y + rotatedUp.Z) / s,
-                    (lookAt.X - sideAxis.Z) / s);
-            }
-            else
-            {
-                SoftFloat s = SoftMath.Sqrt(SoftFloat.One + lookAt.Z - sideAxis.X - rotatedUp.Y) * (SoftFloat)2.0f;
-                return new SoftQuaternion(
-                    (lookAt.X + sideAxis.Z) / s,
-                    (lookAt.Y + rotatedUp.Z) / s,
-                    (SoftFloat)0.25f * s,
-                    (sideAxis.Y - rotatedUp.X) / s);
-            }
         }
 
         /// <summary>
