@@ -1,4 +1,6 @@
-﻿namespace GameLibrary.Mathematics
+﻿using System.Runtime.CompilerServices;
+
+namespace GameLibrary.Mathematics
 {
     /// <summary>
     /// This is bitwise implementation of float operations. Use <see cref="SoftMath"/> instead.
@@ -18,6 +20,15 @@
         	}
         
         	return SoftFloat.FromRaw(f.RawValue & 0x7FFFFFFF);
+        }
+        
+        /// <summary>
+        /// Returns x with sign of y.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftFloat CopySign(SoftFloat x, SoftFloat y)
+        {
+            return SoftFloat.FromRaw((x.RawValue & 0x7FFFFFFF) | (y.RawValue & 0x80000000));
         }
         
         /// <summary>

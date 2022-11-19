@@ -147,6 +147,15 @@ namespace GameLibrary.Mathematics
         }
 
         /// <summary>
+        /// Returns x with sign of y.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftFloat CopySign(SoftFloat x, SoftFloat y)
+        {
+            return SoftMathArithmetic.CopySign(x, y);
+        }
+        
+        /// <summary>
         /// Returns x modulo y.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

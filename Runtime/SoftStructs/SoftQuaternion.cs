@@ -307,6 +307,97 @@ namespace GameLibrary.Mathematics
         }
 
         /// <summary>
+        /// Returns a quaternion rotation given a forward vector and up vector.
+        /// The two input vectors are assumed to be not collinear.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftQuaternion LookRotation(SoftVector3 forward, SoftVector3 up)
+        {
+            // Third column
+            SoftVector3 lookAt = SoftVector3.Normalize(forward);
+            // First column
+            SoftVector3 sideAxis = SoftVector3.Normalize(SoftVector3.Cross(forward, up));
+            // Second column
+            SoftVector3 rotatedUp = SoftVector3.Cross(lookAt, sideAxis);
+
+            // Sum of diagonal elements
+            SoftFloat trace1 = SoftFloat.One + sideAxis.X - rotatedUp.Y - lookAt.Z;
+            SoftFloat trace2 = SoftFloat.One - sideAxis.X + rotatedUp.Y - lookAt.Z;
+            SoftFloat trace3 = SoftFloat.One - sideAxis.X - rotatedUp.Y + lookAt.Z;
+            
+            // Choose largest diagonal
+            if (trace1 > trace2 && trace1 > trace3) 
+            { 
+                SoftFloat s = SoftMath.Sqrt(trace1) * (SoftFloat)2.0f;
+                return new SoftQuaternion(
+                    (SoftFloat)0.25f * s,
+                    (rotatedUp.X + sideAxis.Y) / s,
+                    (lookAt.X + sideAxis.Z) / s,
+                    (rotatedUp.Z - lookAt.Y) / s);
+            }
+            else if (trace2 > trace1 && trace2 > trace3)
+            { 
+                SoftFloat s = SoftMath.Sqrt(trace2) * (SoftFloat)2.0f;
+                return new SoftQuaternion(
+                    (rotatedUp.X + sideAxis.Y) / s,
+                    (SoftFloat)0.25f * s,
+                    (lookAt.Y + rotatedUp.Z) / s,
+                    (lookAt.X - sideAxis.Z) / s);
+            }
+            else
+            { 
+                SoftFloat s = SoftMath.Sqrt(trace3) * (SoftFloat)2.0f;
+                return new SoftQuaternion(
+                    (lookAt.X + sideAxis.Z) / s,
+                    (lookAt.Y + rotatedUp.Z) / s,
+                    (SoftFloat)0.25f * s,
+                    (sideAxis.Y - rotatedUp.X) / s);
+            }
+
+            // Another method
+            
+            //Sum of diagonal elements
+            SoftFloat matrixTrace = sideAxis.X + rotatedUp.Y + lookAt.Z;
+            if (matrixTrace > SoftFloat.Zero)
+            {
+                SoftFloat s = (SoftFloat)0.5f / SoftMath.Sqrt(matrixTrace + SoftFloat.One);
+                return new SoftQuaternion(
+                    (rotatedUp.Z - lookAt.Y) * s,
+                    (lookAt.X - sideAxis.Z) * s,
+                    (sideAxis.Y - rotatedUp.X) * s,
+                    (SoftFloat)(SoftFloat)0.25f / s);
+            }
+            
+            if (sideAxis.X > rotatedUp.Y && sideAxis.X > lookAt.Z)
+            {
+                SoftFloat s = SoftMath.Sqrt(SoftFloat.One + sideAxis.X - rotatedUp.Y - lookAt.Z) * (SoftFloat)2.0f;
+                return new SoftQuaternion(
+                    (SoftFloat)0.25f * s,
+                    (rotatedUp.X + sideAxis.Y) / s,
+                    (lookAt.X + sideAxis.Z) / s,
+                    (rotatedUp.Z - lookAt.Y) / s);
+            }
+            else if (rotatedUp.Y > lookAt.Z)
+            {
+                SoftFloat s = SoftMath.Sqrt(SoftFloat.One + rotatedUp.Y - sideAxis.X - lookAt.Z) * (SoftFloat)2.0f;
+                return new SoftQuaternion(
+                    (rotatedUp.X + sideAxis.Y) / s,
+                    (SoftFloat)0.25f * s,
+                    (lookAt.Y + rotatedUp.Z) / s,
+                    (lookAt.X - sideAxis.Z) / s);
+            }
+            else
+            {
+                SoftFloat s = SoftMath.Sqrt(SoftFloat.One + lookAt.Z - sideAxis.X - rotatedUp.Y) * (SoftFloat)2.0f;
+                return new SoftQuaternion(
+                    (lookAt.X + sideAxis.Z) / s,
+                    (lookAt.Y + rotatedUp.Z) / s,
+                    (SoftFloat)0.25f * s,
+                    (sideAxis.Y - rotatedUp.X) / s);
+            }
+        }
+
+        /// <summary>
         /// Compares two quaternions with <see cref="SoftMath.CalculationsEpsilonSqr"/> and returns true if they are similar.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
