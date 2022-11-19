@@ -307,36 +307,34 @@ namespace GameLibrary.Mathematics
         }
 
         /// <summary>
-        /// Returns a quaternion rotation given a forward vector and up vector.
+        /// Returns a rotation with the specified forward and up directions.
         /// If inputs are zero length or collinear or have some other weirdness,
         /// then rotation result will be some mix of <see cref="SoftVector3.Forward"/> and <see cref="SoftVector3.Up"/> vectors.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftQuaternion LookRotation(SoftVector3 forward, SoftVector3 up)
         {
-            forward = SoftVector3.NormalizeSafe(forward, SoftVector3.Forward);
-            
-            // First column
-            SoftVector3 sideAxis = SoftVector3.NormalizeSafe(SoftVector3.Cross(up, forward), new SoftVector3(SoftFloat.Zero, -forward.Z, forward.Y));
-            // Second column
-            SoftVector3 rotatedUp = SoftVector3.Cross(forward, sideAxis);
-            // Third column
-            SoftVector3 lookAt = forward;
+            // Third matrix column
+            SoftVector3 lookAt = SoftVector3.NormalizeSafe(forward, SoftVector3.Forward);
+            // First matrix column
+            SoftVector3 sideAxis =
+                SoftVector3.NormalizeSafe(SoftVector3.Cross(up, lookAt), SoftVector3.Orthonormalized(lookAt));
+            // Second matrix column
+            SoftVector3 rotatedUp = SoftVector3.Cross(lookAt, sideAxis);
 
-            // Sums of main diagonal matrix elements
+            // Sums of matrix main diagonal elements
             SoftFloat trace1 = SoftFloat.One + sideAxis.X - rotatedUp.Y - lookAt.Z;
             SoftFloat trace2 = SoftFloat.One - sideAxis.X + rotatedUp.Y - lookAt.Z;
             SoftFloat trace3 = SoftFloat.One - sideAxis.X - rotatedUp.Y + lookAt.Z;
 
-            // If ortonormal vectors forms identity matrix, then return identity rotation
+            // If orthonormal vectors forms identity matrix, then return identity rotation
             if (trace1 + trace2 + trace3 < SoftMath.CalculationsEpsilon)
             {
                 return Identity;
             }
-            
+
             // Choose largest diagonal
-            if (trace1 > trace2 && trace1 > trace3) 
-            { 
+            if (trace1 + SoftMath.CalculationsEpsilon > trace2 && trace1 + SoftMath.CalculationsEpsilon > trace3)
+            {
                 SoftFloat s = SoftMath.Sqrt(trace1) * (SoftFloat)2.0f;
                 return new SoftQuaternion(
                     (SoftFloat)0.25f * s,
@@ -344,8 +342,8 @@ namespace GameLibrary.Mathematics
                     (lookAt.X + sideAxis.Z) / s,
                     (rotatedUp.Z - lookAt.Y) / s);
             }
-            else if (trace2 > trace1 && trace2 > trace3)
-            { 
+            else if (trace2 + SoftMath.CalculationsEpsilon > trace1 && trace2 + SoftMath.CalculationsEpsilon > trace3)
+            {
                 SoftFloat s = SoftMath.Sqrt(trace2) * (SoftFloat)2.0f;
                 return new SoftQuaternion(
                     (rotatedUp.X + sideAxis.Y) / s,
@@ -354,7 +352,7 @@ namespace GameLibrary.Mathematics
                     (lookAt.X - sideAxis.Z) / s);
             }
             else
-            { 
+            {
                 SoftFloat s = SoftMath.Sqrt(trace3) * (SoftFloat)2.0f;
                 return new SoftQuaternion(
                     (lookAt.X + sideAxis.Z) / s,

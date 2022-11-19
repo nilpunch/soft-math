@@ -75,7 +75,7 @@ namespace GameLibrary.Mathematics
         public static SoftFloat CalculationsEpsilonSqr => SoftFloat.FromRaw(0x2b8cbccc);
 
         /// <summary>
-        /// Returns the sign of the given soft float number.
+        /// Returns 1, -1 or 0 depending on sign and magnitude of the given soft float number. For NaN and zero returns 0.
         /// </summary>
         public static SoftFloat Sign(SoftFloat x)
         {
@@ -104,6 +104,7 @@ namespace GameLibrary.Mathematics
         /// <summary>
         /// Returns the maximum of the two given soft float values. Returns NaN if either argument is NaN.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftFloat Max(SoftFloat x, SoftFloat y)
         {
             if (x > y || SoftFloat.IsNaN(x))
@@ -117,6 +118,7 @@ namespace GameLibrary.Mathematics
         /// <summary>
         /// Returns the minimum of the two given soft float values. Returns NaN if either argument is NaN.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftFloat Min(SoftFloat x, SoftFloat y)
         {
             if (x < y || SoftFloat.IsNaN(x))
@@ -147,7 +149,7 @@ namespace GameLibrary.Mathematics
         }
 
         /// <summary>
-        /// Returns x with sign of y.
+        /// Returns value x with sign of y. Also applies sign from NaN and Zero.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftFloat CopySign(SoftFloat x, SoftFloat y)

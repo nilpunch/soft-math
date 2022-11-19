@@ -300,6 +300,30 @@ namespace GameLibrary.Mathematics
                 return defaultValue;
             return a / SoftMath.Sqrt(lengthSqr);
         }
+        
+        /// <summary>
+        /// Returns non-normalized perpendicular vector to a given one. For normalized see <see cref="Orthonormalized"/>
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftVector3 Orthogonal(SoftVector3 a)
+        {
+            return new SoftVector3(
+                SoftMath.CopySign(a.Z, a.X),
+                SoftMath.CopySign(a.Z, a.Y),
+                -SoftMath.CopySign(a.X, a.Z) - SoftMath.CopySign(a.Y, a.Z));
+        }
+        
+        /// <summary>
+        /// Returns orthogonal basis vector to a given one.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftVector3 Orthonormalized(SoftVector3 a)
+        {
+            SoftFloat length = Length(a);
+            SoftFloat s = SoftMath.CopySign(length, a.Z);
+            SoftFloat h = a.Z + s;
+            return new SoftVector3(s * h - a.X * a.X, -a.X * a.Y, -a.X * h);
+        }
 
         /// <summary>
         /// Returns a vector that is made from the largest components of two vectors.

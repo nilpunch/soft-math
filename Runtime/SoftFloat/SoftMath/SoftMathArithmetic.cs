@@ -12,6 +12,7 @@ namespace GameLibrary.Mathematics
         /// <summary>
         /// Returns the absolute value of the given soft float number. Leaves NaN untouched.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftFloat Abs(SoftFloat f)
         {
         	if (SoftFloat.IsNaN(f))
