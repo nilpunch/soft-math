@@ -8,9 +8,21 @@ namespace GameLibrary.Mathematics
     /// </summary>
     public readonly struct SoftQuaternion : IEquatable<SoftQuaternion>, IFormattable
     {
+        /// <summary>
+        /// X component of imaginary axis.
+        /// </summary>
         public readonly SoftFloat X;
+        /// <summary>
+        /// Y component of imaginary axis.
+        /// </summary>
         public readonly SoftFloat Y;
+        /// <summary>
+        /// Y component of imaginary axis.
+        /// </summary>
         public readonly SoftFloat Z;
+        /// <summary>
+        /// Real scalar component.
+        /// </summary>
         public readonly SoftFloat W;
 
         /// <summary>
@@ -24,12 +36,23 @@ namespace GameLibrary.Mathematics
             Z = z;
             W = w;
         }
+        
+        /// <summary>
+        /// Constructs a quaternion from unit quaternion.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SoftQuaternion(SoftUnitQuaternion quaternion)
+        {
+            X = quaternion.X;
+            Y = quaternion.Y;
+            Z = quaternion.Z;
+            W = quaternion.W;
+        }
 
         /// <summary>
         /// The identity rotation.
         /// </summary>
-        public static SoftQuaternion Identity =>
-            new SoftQuaternion(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.One);
+        public static SoftQuaternion Identity => new SoftQuaternion(SoftFloat.Zero, SoftFloat.Zero, SoftFloat.Zero, SoftFloat.One);
 
         /// <summary>
         /// Returns true if the given quaternion is exactly equal to this quaternion.
@@ -171,15 +194,6 @@ namespace GameLibrary.Mathematics
         public static bool operator !=(SoftQuaternion a, SoftQuaternion b) => !(a == b);
 
         /// <summary>
-        /// Constructs quaternion from normalized one.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion FromVersor(SoftVersor versor)
-        {
-            return new SoftQuaternion(versor.X, versor.Y, versor.Z, versor.W);
-        }
-
-        /// <summary>
         /// The dot product between two rotations.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -241,8 +255,7 @@ namespace GameLibrary.Mathematics
         /// Returns the given default value when quaternion length close to zero.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftQuaternion NormalizeSafe(SoftQuaternion a,
-            SoftQuaternion defaultValue = new SoftQuaternion())
+        public static SoftQuaternion NormalizeSafe(SoftQuaternion a, SoftQuaternion defaultValue = new SoftQuaternion())
         {
             SoftFloat sqrLength = LengthSqr(a);
             if (sqrLength < SoftMath.CalculationsEpsilonSqr)
@@ -255,8 +268,7 @@ namespace GameLibrary.Mathematics
         /// Non-commutative, torque-minimal, constant velocity.
         /// Preserve it's properties when quaternions have identical length. 
         /// </summary>
-        public static SoftQuaternion Slerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t,
-            bool longPath = false)
+        public static SoftQuaternion Slerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t, bool longPath = false)
         {
             // Calculate angle between them.
             SoftFloat cosHalfTheta = Dot(Normalize(a), Normalize(b));
@@ -298,8 +310,7 @@ namespace GameLibrary.Mathematics
         /// Commutative, torque-minimal, non-constant velocity.
         /// Preserve it's properties when quaternions have identical length.
         /// </summary>
-        public static SoftQuaternion Nlerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t,
-            bool longPath = false)
+        public static SoftQuaternion Nlerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t, bool longPath = false)
         {
             SoftFloat dot = Dot(a, b);
 
@@ -327,8 +338,7 @@ namespace GameLibrary.Mathematics
         /// <summary>
         /// Returns a componentwise interpolation between two quaternions.
         /// </summary>
-        public static SoftQuaternion Lerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t,
-            bool longPath = false)
+        public static SoftQuaternion Lerp(SoftQuaternion a, SoftQuaternion b, SoftFloat t, bool longPath = false)
         {
             SoftFloat dot = Dot(a, b);
 

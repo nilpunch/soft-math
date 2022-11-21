@@ -302,7 +302,7 @@ namespace GameLibrary.Mathematics
         }
         
         /// <summary>
-        /// Returns non-normalized perpendicular vector to a given one. For normalized see <see cref="Orthonormalized"/>
+        /// Returns non-normalized perpendicular vector to a given one. For normalized see <see cref="Orthonormal"/>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftVector3 Orthogonal(SoftVector3 a)
@@ -317,7 +317,7 @@ namespace GameLibrary.Mathematics
         /// Returns orthogonal basis vector to a given one.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftVector3 Orthonormalized(SoftVector3 a)
+        public static SoftVector3 Orthonormal(SoftVector3 a)
         {
             SoftFloat length = Length(a);
             SoftFloat s = SoftMath.CopySign(length, a.Z);
