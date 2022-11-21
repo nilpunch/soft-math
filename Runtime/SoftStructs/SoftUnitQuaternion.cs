@@ -294,26 +294,10 @@ namespace GameLibrary.Mathematics
         /// Returns a normalized componentwise interpolation between two quaternions.
         /// Commutative, torque-minimal, non-constant velocity.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftUnitQuaternion Nlerp(SoftUnitQuaternion a, SoftUnitQuaternion b, SoftFloat t, bool longPath = false)
         {
-            SoftFloat dot = Dot(a, b);
-
-            if (longPath)
-            {
-                if (dot > SoftFloat.Zero)
-                {
-                    b = -b;
-                }
-            }
-            else
-            {
-                if (dot < SoftFloat.Zero)
-                {
-                    b = -b;
-                }
-            }
-
-            return NormalizeToUnit(a * (SoftFloat.One - t) + b * t);
+            return NormalizeToUnit(SoftQuaternion.Lerp(new SoftQuaternion(a), new SoftQuaternion(b), t, longPath));
         }
 
         /// <summary>
