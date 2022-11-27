@@ -8,21 +8,9 @@ namespace GameLibrary.Mathematics
     /// </summary>
     public readonly struct SoftUnitQuaternion : IEquatable<SoftUnitQuaternion>, IFormattable
     {
-        /// <summary>
-        /// X component of imaginary axis.
-        /// </summary>
         public readonly SoftFloat X;
-        /// <summary>
-        /// Y component of imaginary axis.
-        /// </summary>
         public readonly SoftFloat Y;
-        /// <summary>
-        /// Y component of imaginary axis.
-        /// </summary>
         public readonly SoftFloat Z;
-        /// <summary>
-        /// Real scalar component.
-        /// </summary>
         public readonly SoftFloat W;
 
         // Constructors should be made private to maintain unit length invariant,
