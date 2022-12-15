@@ -53,7 +53,7 @@ namespace GameLibrary.Mathematics
             4, 11, 23, 31, 3, 7, 10, 16, 22, 30, -1, -1, 2, 6, 13, 9,
             -1, 15, -1, 21, -1, 29, 19, -1, -1, -1, -1, -1, 1, 27, 5, 12
         };
-        
+
         private static readonly int[] s_debruijn32_uint = new int[32]
         {
 	        0, 31, 9, 30, 3, 8, 13, 29, 2, 5, 7, 21, 12, 24, 28, 19,
@@ -92,7 +92,7 @@ namespace GameLibrary.Mathematics
         /// </summary>
         /// <seealso cref="SoftFloat.Epsilon"/>
         public static SoftFloat AbsoluteEpsilon => new SoftFloat(RawAbsoluteEpsilon);
-        
+
         /// <summary>
         /// The smallest positive value that can be represented as a normalized number in the format.
         /// Numbers smaller than this can be stored as subnormals, but are not held with as much precision.
@@ -263,7 +263,7 @@ namespace GameLibrary.Mathematics
 	        int value = shift < 0 ? mantissa << -shift : mantissa >> shift;
 	        return IsPositive(f) ? value : -value;
         }
-        
+
         /// <summary>
         /// Creates an soft float number from unsigned integer.
         /// </summary>
@@ -333,7 +333,7 @@ namespace GameLibrary.Mathematics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static SoftFloat operator -(SoftFloat f) => new SoftFloat(f.RawValue ^ 0x80000000);
+		public static SoftFloat operator -(SoftFloat f) => new SoftFloat(f.RawValue ^ SignMask);
 
         public static SoftFloat operator +(SoftFloat f1, SoftFloat f2)
 		{
@@ -504,7 +504,7 @@ namespace GameLibrary.Mathematics
 			int man = (int)(longMan >> MantissaBits);
             uint absMan = (uint)Math.Abs(man);
 			int rawExp = rawExp1 + rawExp2 - ExponentBias;
-			uint sign = (uint)man & 0x80000000;
+			uint sign = (uint)man & SignMask;
 			if ((absMan & 0x1000000) != 0)
 			{
 				absMan >>= 1;
@@ -674,7 +674,7 @@ namespace GameLibrary.Mathematics
 			int man = (int)longMan;
 			uint absMan = (uint)Math.Abs(man);
 			int rawExp = rawExp1 - rawExp2 + ExponentBias;
-			uint sign = (uint)man & 0x80000000;
+			uint sign = (uint)man & SignMask;
 
 			if ((absMan & 0x800000) == 0)
 			{
@@ -834,7 +834,7 @@ namespace GameLibrary.Mathematics
                 absMan >>= msbIndex;
                 if ((uint)(rawExp - 1) < 254)
                 {
-                    uint raw = (uint)man & 0x80000000 | (uint)rawExp << MantissaBits | ((uint)absMan & 0x7FFFFF);
+                    uint raw = (uint)man & SignMask | (uint)rawExp << MantissaBits | ((uint)absMan & 0x7FFFFF);
                     return new SoftFloat(raw);
                 }
 
@@ -846,13 +846,13 @@ namespace GameLibrary.Mathematics
 
                 if (rawExp >= -24)
                 {
-                    uint raw = (uint)man & 0x80000000 | (uint)(absMan >> (-rawExp + 1));
+                    uint raw = (uint)man & SignMask | (uint)(absMan >> (-rawExp + 1));
                     return new SoftFloat(raw);
                 }
 
                 return Zero;
             }
-            
+
             // Special
             if (rawExp2 != 255)
             {
@@ -878,7 +878,7 @@ namespace GameLibrary.Mathematics
 
             return s_debruijn32_int[(uint)x * 0x8c0b2891u >> 26];
         }
-        
+
         /// <summary>Returns number of leading zeros in the binary representations of a uint value.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LeadingZeroesCount(uint x)

@@ -97,7 +97,7 @@ namespace GameLibrary.Mathematics.Tests
                 return;
             }
 
-            if (float.IsInfinity(expected) && SoftFloat.IsInfinity(result) && Math.Sign(expected) == (int)SoftMath.Sign(result))
+            if (float.IsInfinity(expected) && SoftFloat.IsInfinity(result) && Math.Sign(expected) == (int)SoftMath.SignWithZero(result))
             {
                 // both are the same infinities
                 return;
@@ -154,7 +154,7 @@ namespace GameLibrary.Mathematics.Tests
                 return;
             }
 
-            if (float.IsInfinity(expected) && SoftFloat.IsInfinity(result) && Math.Sign(expected) == (int)SoftMath.Sign(result))
+            if (float.IsInfinity(expected) && SoftFloat.IsInfinity(result) && Math.Sign(expected) == (int)SoftMath.SignWithZero(result))
             {
                 // both are the same infinities
                 return;
@@ -192,7 +192,7 @@ namespace GameLibrary.Mathematics.Tests
                 return;
             }
 
-            if (float.IsInfinity(expected) && SoftFloat.IsInfinity(result) && Math.Sign(expected) == (int)SoftMath.Sign(result))
+            if (float.IsInfinity(expected) && SoftFloat.IsInfinity(result) && Math.Sign(expected) == (int)SoftMath.SignWithZero(result))
             {
                 // both are the same infinities
                 return;

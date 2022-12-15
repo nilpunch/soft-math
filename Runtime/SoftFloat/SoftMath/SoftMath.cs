@@ -75,9 +75,22 @@ namespace GameLibrary.Mathematics
         public static SoftFloat CalculationsEpsilonSqr => SoftFloat.FromRaw(0x2b8cbccc);
 
         /// <summary>
-        /// Returns 1, -1 or 0 depending on sign and magnitude of the given soft float number. For NaN and zero returns 0.
+        /// Returns 1, -1 depending on sign of the given soft float number.
         /// </summary>
         public static SoftFloat Sign(SoftFloat x)
+        {
+            if (SoftFloat.IsPositive(x))
+            {
+                return SoftFloat.One;
+            }
+
+            return SoftFloat.MinusOne;
+        }
+
+        /// <summary>
+        /// Returns 1, -1 or 0 depending on sign and magnitude of the given soft float number. For NaN and zero returns 0.
+        /// </summary>
+        public static SoftFloat SignWithZero(SoftFloat x)
         {
             if (SoftFloat.IsNaN(x) || SoftFloat.IsZero(x))
             {
@@ -90,6 +103,15 @@ namespace GameLibrary.Mathematics
             }
 
             return SoftFloat.MinusOne;
+        }
+
+        /// <summary>
+        /// Returns value x with sign of y. Also applies sign from NaN and Zero.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftFloat CopySign(SoftFloat x, SoftFloat y)
+        {
+            return SoftMathArithmetic.CopySign(x, y);
         }
 
         /// <summary>
@@ -148,15 +170,6 @@ namespace GameLibrary.Mathematics
             return difference <= epsilon || difference <= Max(Abs(x), Abs(y)) * epsilon;
         }
 
-        /// <summary>
-        /// Returns value x with sign of y. Also applies sign from NaN and Zero.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SoftFloat CopySign(SoftFloat x, SoftFloat y)
-        {
-            return SoftMathArithmetic.CopySign(x, y);
-        }
-        
         /// <summary>
         /// Returns x modulo y.
         /// </summary>

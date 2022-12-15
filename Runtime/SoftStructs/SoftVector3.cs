@@ -300,9 +300,9 @@ namespace GameLibrary.Mathematics
                 return defaultValue;
             return a / SoftMath.Sqrt(lengthSqr);
         }
-        
+
         /// <summary>
-        /// Returns non-normalized perpendicular vector to a given one. For normalized see <see cref="Orthonormal"/>
+        /// Returns non-normalized perpendicular vector to a given one. For normalized see <see cref="Orthonormal"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SoftVector3 Orthogonal(SoftVector3 a)
@@ -312,7 +312,7 @@ namespace GameLibrary.Mathematics
                 SoftMath.CopySign(a.Z, a.Y),
                 -SoftMath.CopySign(a.X, a.Z) - SoftMath.CopySign(a.Y, a.Z));
         }
-        
+
         /// <summary>
         /// Returns orthogonal basis vector to a given one.
         /// </summary>
@@ -350,6 +350,15 @@ namespace GameLibrary.Mathematics
         public static SoftVector3 AbsComponents(SoftVector3 a)
         {
             return new SoftVector3(SoftMath.Abs(a.X), SoftMath.Abs(a.Y), SoftMath.Abs(a.Z));
+        }
+
+        /// <summary>
+        /// Returns the componentwise signes of a vector.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftVector3 SignComponents(SoftVector3 a)
+        {
+            return new SoftVector3(SoftMath.Sign(a.X), SoftMath.Sign(a.Y), SoftMath.Sign(a.Z));
         }
 
         /// <summary>
