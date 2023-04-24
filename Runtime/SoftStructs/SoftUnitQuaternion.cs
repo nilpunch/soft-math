@@ -16,7 +16,7 @@ namespace GameLibrary.Mathematics
         // Constructors should be made private to maintain unit length invariant,
         // but they are made public since we can't prevent constructing quaternion with default constructor,
         // that forces length 0.
-        
+
         /// <summary>
         /// Constructs a unit quaternion from four SoftFloat values. Use if you know what you are doing.
         /// </summary>
@@ -28,7 +28,7 @@ namespace GameLibrary.Mathematics
             Z = z;
             W = w;
         }
-        
+
         /// <summary>
         /// Constructs a unit quaternion from general quaternion. Use if you know what you are doing.
         /// Does not ensure normalization. For normalizing see <see cref="SoftUnitQuaternion.NormalizeToUnit"/>
@@ -342,7 +342,7 @@ namespace GameLibrary.Mathematics
                     (sideAxis.Y - rotatedUp.X) / s);
             }
         }
-        
+
         /// <summary>
         /// Returns a quaternion representing a rotation around a unit axis by an angle in radians.
         /// The rotation direction is clockwise when looking along the rotation axis towards the origin.
@@ -356,7 +356,27 @@ namespace GameLibrary.Mathematics
             SoftFloat cos = SoftMath.Cos((SoftFloat)0.5f * angle);
             return new SoftUnitQuaternion(axis.X * sin, axis.Y * sin, axis.Z * sin, cos);
         }
-        
+
+        /// <summary>
+        /// Returns a quaternion representing a euler angle in radians.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftUnitQuaternion EulerRadians(SoftVector3 angle)
+        {
+            SoftFloat cr = SoftMath.Cos(angle.X * (SoftFloat)0.5f);
+            SoftFloat sr = SoftMath.Sin(angle.X * (SoftFloat)0.5f);
+            SoftFloat cp = SoftMath.Cos(angle.Y * (SoftFloat)0.5f);
+            SoftFloat sp = SoftMath.Sin(angle.Y * (SoftFloat)0.5f);
+            SoftFloat cy = SoftMath.Cos(angle.Z * (SoftFloat)0.5f);
+            SoftFloat sy = SoftMath.Sin(angle.Z * (SoftFloat)0.5f);
+
+            return new SoftUnitQuaternion(
+                sr * cp * cy - cr * sp * sy,
+                cr * sp * cy + sr * cp * sy,
+                cr * cp * sy - sr * sp * cy,
+                cr * cp * cy + sr * sp * sy);
+        }
+
         /// <summary>
         /// Returns a quaternion representing a rotation around a unit axis by an angle in degrees.
         /// The rotation direction is clockwise when looking along the rotation axis towards the origin.

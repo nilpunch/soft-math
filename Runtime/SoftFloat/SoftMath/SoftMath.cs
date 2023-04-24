@@ -152,6 +152,25 @@ namespace GameLibrary.Mathematics
         }
 
         /// <summary>
+        /// Returns the clamped value of the two given soft floats.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SoftFloat Clamp(SoftFloat x, SoftFloat min, SoftFloat max)
+        {
+            if (x < min)
+            {
+                return min;
+            }
+
+            if (x > max)
+            {
+                return max;
+            }
+
+            return x;
+        }
+
+        /// <summary>
         /// Compares two soft floats with <see cref="SoftMath.CalculationsEpsilonSqr"/> and returns true if they are similar.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
