@@ -1,4 +1,4 @@
-# soft-math - Work in progress
+# soft-math - On Hold
 
 Unity package. Deterministic math library for online games and more. Based on software floating point implementation.  
 Does not reference Unity Engine, so it could be used in a regular C# project.
